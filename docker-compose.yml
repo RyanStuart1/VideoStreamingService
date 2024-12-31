@@ -1,0 +1,50 @@
+version: '3'
+services:
+  user-service:
+    build: ./user-service
+    ports:
+      - "3000:3000"
+
+  videoStreaming-service:
+    build: ./videoStreaming-service
+    ports:
+      - "3001:3001"
+  
+    watchlist-service:
+    build: ./watchlist-service
+    ports:
+      - "3002:3002"
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3003:3003"
+    depends_on:
+      - user-service
+      - video-service
+      - watchlist-service
+    
+  frontend:
+    build: ./frontend
+    ports:
+      - "3004:3000"  # The frontend will be available on port 3003 (mapped to container's 3000)
+    depends_on:
+      - api-gateway
+
+  nginx:
+  web:
+    build: .
+    ports:
+      - "8081:8081"
+  reverse-proxy:
+    image: nginx
+    ports:
+      - "8083:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - user-service
+      - videoStreaming-service
+      - watchlist-service
+      - frontend
+      - api-gateway    

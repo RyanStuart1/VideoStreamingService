@@ -3,8 +3,16 @@ const app = express();
 const port = 3001;  
 
 const videos = [
-  { id: 1, title: 'FreeVideo' },
-  { id: 2, title: 'Microservices with Node.js' }
+  { id: 1,
+    title: 'FreeVideo',
+    thumbnail: 'aws link',
+    url: ''
+  },
+  { id: 2, 
+    title: 'Microservices with Node.js', 
+    thumbnail: 'aws link', 
+    url: '' 
+  },
 ];  
  
 app.get('/videos', (req, res) => {
