@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './App.css';
 
 function App() {
   const [users, setUsers] = useState([]);
   const [videos, setVideos] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
-
+  
   useEffect(() => {
     axios.get('/api/users')
       .then(response => setUsers(response.data))
@@ -14,6 +15,10 @@ function App() {
     axios.get('/api/videos')
       .then(response => setVideos(response.data))
       .catch(error => console.log('Error:', error));
+
+    axios.get('/api/watchlist')
+      .then(response => setWatchlist(response.data))
+      .catch(error => console.log('Error:', error));  
   }, []);
 
   return (
@@ -28,6 +33,12 @@ function App() {
       <ul>
         {videos.map(video => (
           <li key={video.id}>{video.title}</li>
+        ))}
+      </ul>
+      <h1>Watchlist</h1>
+      <ul>
+        {watchlist.map(item => (
+          <li key={item.id}>{item.title} - Status: {item.status}</li>
         ))}
       </ul>
     </div>
