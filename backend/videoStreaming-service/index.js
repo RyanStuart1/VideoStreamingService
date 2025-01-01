@@ -3,7 +3,7 @@ const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.VIDEO_SERVICE_PORT || 3001;
+const port = 3001;
 
 // MongoDB connection URI from .env file
 const uri = process.env.DOCUMENTDB_URI;
