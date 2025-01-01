@@ -10,7 +10,7 @@ services:
     ports:
       - "3001:3001"
   
-    watchlist-service:
+  watchlist-service:
     build: ./watchlist-service
     ports:
       - "3002:3002"
@@ -27,7 +27,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3004:3000"  # The frontend will be available on port 3003 (mapped to container's 3000)
+      - "3004:3000"  # The frontend will be available on port 3004 (mapped to container's 3000)
     depends_on:
       - api-gateway
 

@@ -55,3 +55,10 @@ app.listen(port, async () => {
   await connectToDB(); // Connect to DocumentDB before starting the server
   console.log(`Video Service running on port ${port}`);
 });
+
+// Handle process termination
+process.on('SIGINT', async () => {
+  console.log('Closing MongoDB connection...');
+  await client.close();
+  process.exit(0);
+});
