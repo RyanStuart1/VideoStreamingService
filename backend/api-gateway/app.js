@@ -8,6 +8,7 @@ app.use(express.json());
 
 const USER_SERVICE_URL = 'http://userAuthentication-service:3000';
 const VIDEO_SERVICE_URL = 'http://videoStreaming-service:3001';
+const WATCHLIST_SERVICE_URL = 'http://watchlist-service:3002';
 
 app.get('/api/users', async (req, res) => {
   try {
@@ -24,6 +25,15 @@ app.get('/api/videos', async (req, res) => {
     res.json(response.data);
   } catch (error) {
     res.status(500).send('Error fetching videos');
+  }
+});
+
+app.get('/api/watchlist', async (req, res) => {
+  try {
+    const response = await axios.get(`${WATCHLIST_SERVICE_URL}/watchlist`);
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).send('Error fetching watchlist');
   }
 });
 
