@@ -10,33 +10,27 @@ on:
 
 jobs:
  # User Service Job
-userAuthentication-service:
-  name: 🛠️ User Authentication Service - Build and Push Docker Image
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+ userauthentication-service:
+   name: 🐳 User Authentication Service - Build and Push Docker Image
+   runs-on: ubuntu-latest
+   steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Debug - List repository files
-      run: ls -la
+      - name: Set up Node.js for User Service
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-    - name: Set up Node.js for User Service
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+      - name: Install dependencies for User Authentication Service
+        run: npm install
+        working-directory: ./userauthentication-service
 
-    - name: Debug - Verify Node.js version
-      run: node --version
-
-    - name: Install dependencies for User Authentication Service
-      working-directory: ./userAuthentication-service
-      run: npm install
-
-    - name: Build Docker image for User Service
-      run: docker build -t userAuthentication-service ./userAuthentication-service
-
+      - name: Build Docker image for User Service
+        run: docker build -t userauthentication-service ./userauthentication-service
+      
  # Video Service Job
- videoStreaming-service:
+ videostreaming-service:
    name: 🎥 Video Streaming Service - Build and Push Docker Image
    runs-on: ubuntu-latest
    steps:
@@ -50,10 +44,10 @@ userAuthentication-service:
 
      - name: Install dependencies for Video Streaming Service
        run: npm install
-       working-directory: ./videoStreaming-service
+       working-directory: ./videostreaming-service
 
      - name: Build Docker image for Video Service
-       run: docker build -t video-service ./videoStreaming-service
+       run: docker build -t video-service ./videostreaming-service
 
  # API Gateway Job
  api-gateway:
