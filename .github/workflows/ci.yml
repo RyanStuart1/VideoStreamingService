@@ -1,0 +1,110 @@
+name: CI/CD Pipeline
+
+on:
+ push:
+   branches:
+     - main
+ pull_request:
+   branches:
+     - main
+
+jobs:
+ # User Service Job
+ userAuthentication-service:
+   name: 🐳 User Authentication Service - Build and Push Docker Image
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout code
+       uses: actions/checkout@v3
+
+     - name: Set up Node.js for User Service
+       uses: actions/setup-node@v3
+       with:
+         node-version: '20'
+
+     - name: Install dependencies for User Authentication Service
+       run: npm install
+       working-directory: ./userAuthentication-service
+
+     - name: Build Docker image for User Service
+       run: docker build -t userAuthentication-service ./userAuthentication-service
+
+ # Video Service Job
+ videoStreaming-service:
+   name: 🎥 Video Streaming Service - Build and Push Docker Image
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout code
+       uses: actions/checkout@v3
+
+     - name: Set up Node.js for Video Streaming Service
+       uses: actions/setup-node@v3
+       with:
+         node-version: '20'
+
+     - name: Install dependencies for Video Streaming Service
+       run: npm install
+       working-directory: ./videoStreaming-service
+
+     - name: Build Docker image for Video Service
+       run: docker build -t video-service ./videoStreaming-service
+
+ # API Gateway Job
+ api-gateway:
+   name: 🚪 API Gateway - Build and Push Docker Image
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout code
+       uses: actions/checkout@v3
+
+     - name: Set up Node.js for API Gateway
+       uses: actions/setup-node@v3
+       with:
+         node-version: '20'
+
+     - name: Install dependencies for API Gateway
+       run: npm install
+       working-directory: ./api-gateway
+
+     - name: Build Docker image for API Gateway
+       run: docker build -t api-gateway ./api-gateway
+
+ # Watchlist service Job
+ watchlist-service:
+   name: watchlist service - Build and Push Docker Image
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout code
+       uses: actions/checkout@v3
+
+     - name: Set up Node.js for watchlist service
+       uses: actions/setup-node@v3
+       with:
+         node-version: '20'
+
+     - name: Install dependencies for watchlist service
+       run: npm install
+       working-directory: ./watchlist-service
+
+     - name: Build Docker image for watchlist service
+       run: docker build -t watchlist-service ./watchlist-service
+
+ # Frontend Service Job
+ frontend:
+   name: 💻 Frontend - Build and Push Docker Image
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout code
+       uses: actions/checkout@v3
+
+     - name: Set up Node.js for Frontend
+       uses: actions/setup-node@v3
+       with:
+         node-version: '20'
+
+     - name: Install dependencies for Frontend
+       run: npm install
+       working-directory: ./frontend
+
+     - name: Build Docker image for Frontend
+       run: docker build -t frontend ./frontend

@@ -1,7 +1,7 @@
 version: '3'
 services:
-  user-service:
-    build: ./user-service
+  userAuthentication-service:
+    build: ./userAuthentication-service
     ports:
       - "3000:3000"
 
@@ -20,7 +20,7 @@ services:
     ports:
       - "3003:3003"
     depends_on:
-      - user-service
+      - userAuthentication-service
       - video-service
       - watchlist-service
     
