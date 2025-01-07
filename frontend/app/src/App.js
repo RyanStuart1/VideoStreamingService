@@ -6,20 +6,31 @@ function App() {
   const [users, setUsers] = useState([]);
   const [videos, setVideos] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
-  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    axios.get('/api/users')
-      .then(response => setUsers(response.data))
-      .catch(error => console.log('Error:', error));
+    const fetchData = async () => {
+      try {
+        const usersResponse = await axios.get('/api/users');
+        setUsers(usersResponse.data);
 
-    axios.get('/api/videos')
-      .then(response => setVideos(response.data))
-      .catch(error => console.log('Error:', error));
+        const videosResponse = await axios.get('/api/videos');
+        setVideos(videosResponse.data);
 
-    axios.get('/api/watchlist')
-      .then(response => setWatchlist(response.data))
-      .catch(error => console.log('Error:', error));  
+        const watchlistResponse = await axios.get('/api/watchlist');
+        setWatchlist(watchlistResponse.data);
+
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load data');
+      }
+    };
+    fetchData();
   }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div>
@@ -29,12 +40,17 @@ function App() {
           <li key={user.id}>{user.name} ({user.email})</li>
         ))}
       </ul>
+
       <h1>Videos</h1>
-      <ul>
-        {videos.map(video => (
-          <li key={video.id}>{video.title}</li>
-        ))}
-      </ul>
+      {videos.map(video => (
+        <div key={video.id}>
+          <h2>{video.title}</h2>
+          <video width={800} height={500} controls loop autoPlay muted>
+            <source src={video.url} type="video/mp4" />
+          </video>
+        </div>
+      ))}
+
       <h1>Watchlist</h1>
       <ul>
         {watchlist.map(item => (
