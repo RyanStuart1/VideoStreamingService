@@ -17,6 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug directory
+        run: ls -la ./backend
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -37,13 +40,15 @@ jobs:
           docker tag userauthentication-service ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
 
-  # Video Streaming Service
   videostreaming-service:
     name: 🎥 Video Streaming Service - Build and Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Debug directory
+        run: ls -la ./backend
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -64,7 +69,6 @@ jobs:
         run: |
           docker tag videostreaming-service ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
-
   # API Gateway
   api-gateway:
     name: 🚪 API Gateway - Build and Push Docker Image
