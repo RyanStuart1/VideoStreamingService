@@ -20,7 +20,7 @@ jobs:
       - name: Debug npm install
         run: |
           echo "Listing contents of working directory"
-          ls -la ./backend/userauthentication-service
+          ls -la ./backend/userAuthentication-service
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -38,18 +38,18 @@ jobs:
           for i in {1..5}; do
             npm install && break || sleep 10;
           done
-        working-directory: ./backend/userauthentication-service
+        working-directory: ./backend/userAuthentication-service
 
       - name: Build Docker image
-        run: docker build -t userauthentication-service ./backend/userauthentication-service
+        run: docker build -t userAuthentication-service ./backend/userAuthentication-service
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Docker image
         run: |
-          docker tag userauthentication-service ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
+          docker tag userAuthentication-service ${{ secrets.DOCKER_USERNAME }}/userAuthentication-service:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/userAuthentication-service:latest
 
   # video streaming Service       
   videostreaming-service:
@@ -62,7 +62,7 @@ jobs:
       - name: Debug npm install
         run: |
           echo "Listing contents of working directory"
-          ls -la ./backend/videostreaming-service
+          ls -la ./backend/videoStreaming-service
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -80,18 +80,18 @@ jobs:
           for i in {1..5}; do
             npm install && break || sleep 10;
           done
-        working-directory: ./backend/videostreaming-service
+        working-directory: ./backend/videoStreaming-service
 
       - name: Build Docker image
-        run: docker build -t videostreaming-service ./backend/videostreaming-service
+        run: docker build -t videoStreaming-service ./backend/videoStreaming-service
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Docker image
         run: |
-          docker tag videostreaming-service ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
+          docker tag videoStreaming-service ${{ secrets.DOCKER_USERNAME }}/videoStreaming-service:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/videoStreaming-service:latest
 
   # API Gateway
   api-gateway:
