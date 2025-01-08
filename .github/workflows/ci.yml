@@ -24,10 +24,10 @@ jobs:
 
       - name: Install dependencies for User Authentication Service
         run: npm install
-        working-directory: ./userauthentication-service
+        working-directory: ./backend/userauthentication-service
 
       - name: Build Docker image for User Service
-        run: docker build -t userauthentication-service ./userauthentication-service
+        run: docker build -t userauthentication-service ./backend/userauthentication-service
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -52,10 +52,10 @@ jobs:
 
      - name: Install dependencies for Video Streaming Service
        run: npm install
-       working-directory: ./videostreaming-service
+       working-directory: ./backend/videostreaming-service
 
      - name: Build Docker image for Video Service
-       run: docker build -t video-service ./videostreaming-service
+       run: docker build -t video-service ./backend/videostreaming-service
 
      - name: Log in to Docker Hub
        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -81,10 +81,10 @@ jobs:
 
      - name: Install dependencies for API Gateway
        run: npm install
-       working-directory: ./api-gateway
+       working-directory: ./backend/api-gateway
 
      - name: Build Docker image for API Gateway
-       run: docker build -t api-gateway ./api-gateway
+       run: docker build -t api-gateway ./backend/api-gateway
     
      - name: Log in to Docker Hub
        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -110,10 +110,10 @@ jobs:
 
      - name: Install dependencies for watchlist service
        run: npm install
-       working-directory: ./watchlist-service
+       working-directory: ./backend/watchlist-service
 
      - name: Build Docker image for watchlist service
-       run: docker build -t watchlist-service ./watchlist-service
+       run: docker build -t watchlist-service ./backend/watchlist-service
 
      - name: Log in to Docker Hub
        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
