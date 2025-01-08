@@ -1,64 +1,83 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, ScanCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 require('dotenv').config();
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001; // Use environment variable or fallback
 
-// MongoDB connection URI from .env file
-const uri = process.env.DOCUMENTDB_URI;
-const client = new MongoClient(uri);
+// Configure AWS DynamoDB client with optional VPC Endpoint
+const dynamoDbClient = new DynamoDBClient({
+  region: process.env.AWS_REGION || 'us-east-1', // AWS Region
+  endpoint: process.env.DYNAMO_VPC_ENDPOINT || undefined, // Use VPC endpoint if provided
+});
 
-let videoCollection;
+// Create a DynamoDB Document Client for easier interaction
+const dynamoDb = DynamoDBDocumentClient.from(dynamoDbClient);
 
-// Connect to DocumentDB and initialize collection
-const connectToDB = async () => {
-  try {
-    await client.connect();
-    const database = client.db('videoStreamingDB'); // Replace with your database name
-    videoCollection = database.collection('videos');
-    console.log('Connected to DocumentDB');
-  } catch (error) {
-    console.error('Error connecting to DocumentDB:', error);
-    process.exit(1); // Exit if the connection fails
-  }
-};
+// Table name from environment variable or default
+const tableName = process.env.DYNAMO_TABLE_NAME || 'VideosMetaData'; 
 
 // Route to fetch all video metadata
 app.get('/videos', async (req, res) => {
   try {
-    const videos = await videoCollection.find({}).toArray(); // Fetch all videos
-    res.json(videos); // Respond with the video metadata
+    console.log(`Fetching all video metadata from table: ${tableName}`);
+    const params = { TableName: tableName };
+    console.log('ScanCommand Params:', params);
+
+    const data = await dynamoDb.send(new ScanCommand(params)); // Fetch all items
+    if (!data.Items || data.Items.length === 0) {
+      console.warn('No video metadata found in the table.');
+      return res.status(404).json({ error: 'No video metadata found' });
+    }
+
+    console.log('ScanCommand Result:', JSON.stringify(data.Items, null, 2));
+    res.json(data.Items); // Respond with all video metadata
   } catch (error) {
-    console.error('Error fetching videos:', error);
-    res.status(500).json({ error: 'Failed to fetch videos' });
+    console.error('Error fetching video metadata:', error);
+    res.status(500).json({ error: 'Failed to fetch video metadata' });
   }
 });
 
-// Route to fetch a single video by ID
+// Route to fetch metadata for a specific video by ID
 app.get('/videos/:id', async (req, res) => {
   try {
-    const videoId = parseInt(req.params.id);
-    const video = await videoCollection.findOne({ id: videoId }); // Find video by ID
-    if (!video) {
-      return res.status(404).json({ error: 'Video not found' });
+    let videoId = req.params.id; // Treat ID as string by default
+    console.log(`Fetching metadata for video with ID: ${videoId}`);
+
+    // Convert ID to number if the table uses `N` (number) as the type for `id`
+    if (process.env.DYNAMO_ID_TYPE === 'N') {
+      videoId = parseInt(videoId, 10);
+      if (isNaN(videoId)) {
+        console.error('Invalid video ID provided:', req.params.id);
+        return res.status(400).json({ error: 'Invalid video ID' });
+      }
     }
-    res.json(video);
+
+    const params = {
+      TableName: tableName,
+      Key: { id: videoId }, // Use `id` as string or number
+    };
+    console.log('DynamoDB GetCommand Params:', JSON.stringify(params, null, 2));
+
+    const command = new GetCommand(params);
+    const data = await dynamoDb.send(command);
+
+    if (!data.Item) {
+      console.warn(`Video metadata with ID ${videoId} not found.`);
+      return res.status(404).json({ error: 'Video metadata not found' });
+    }
+
+    console.log('GetCommand Result:', JSON.stringify(data.Item, null, 2));
+    res.json(data.Item);
   } catch (error) {
-    console.error('Error fetching video:', error);
-    res.status(500).json({ error: 'Failed to fetch video' });
+    console.error('Error fetching video metadata:', error);
+    res.status(500).json({ error: 'Failed to fetch video metadata' });
   }
 });
 
-// Start the server
-app.listen(port, async () => {
-  await connectToDB(); // Connect to DocumentDB before starting the server
-  console.log(`Video Service running on port ${port}`);
-});
-
-// Handle process termination
-process.on('SIGINT', async () => {
-  console.log('Closing MongoDB connection...');
-  await client.close();
-  process.exit(0);
+// Start the server with logging
+app.listen(port, () => {
+  console.log(`AWS Region: ${process.env.AWS_REGION || 'us-east-1'}`);
+  console.log(`Video Metadata Service running on port ${port}`);
 });

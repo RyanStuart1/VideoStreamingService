@@ -6,7 +6,7 @@ function App() {
   const [users, setUsers] = useState([]);
   const [videos, setVideos] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function App() {
     fetchData();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>; 
   if (error) return <p>{error}</p>;
 
   return (
@@ -46,7 +46,7 @@ function App() {
         <div key={video.id}>
           <h2>{video.title}</h2>
           <video width={800} height={500} controls loop autoPlay muted>
-            <source src={video.url} type="video/mp4" />
+          <source src={`/videos/${video.filename}`} type="video/mp4" />
           </video>
         </div>
       ))}

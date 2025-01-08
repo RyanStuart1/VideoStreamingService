@@ -1,19 +1,31 @@
-version: '3'
+version: '3.8'
+
 services:
   userauthentication-service:
     build: ./backend/userauthentication-service
     ports:
       - "3000:3000"
+    environment:
+      - AWS_REGION=us-east-1
+      - DYNAMO_TABLE_NAME=UserAuthenticationData
 
-  videostreaming-service:
-    build: ./backend/videostreaming-service
-    ports:
-      - "3001:3001"
-  
+videostreaming-service:
+  build: ./backend/videostreaming-service
+  ports:
+    - "3001:3001"
+  environment:
+    - AWS_REGION=us-east-1
+  volumes:
+    - ~/.aws:/root/.aws  # Mount the AWS credentials directory
+
+
   watchlist-service:
     build: ./backend/watchlist-service
     ports:
       - "3002:3002"
+    environment:
+      - AWS_REGION=us-east-1
+      - DYNAMO_TABLE_NAME=WatchlistData
 
   api-gateway:
     build: ./backend/api-gateway
@@ -23,14 +35,18 @@ services:
       - userauthentication-service
       - videostreaming-service
       - watchlist-service
-    
+    environment:
+      - AWS_REGION=us-east-1
+
   frontend:
-    build: 
+    build:
       context: ./frontend
     ports:
-      - "3004:3000"  # The frontend will be available on port 3004 (mapped to container's 3000)
+      - "3004:3000" # The frontend will be available on port 3004 (mapped to container's 3000)
     depends_on:
       - api-gateway
+    environment:
+      - REACT_APP_API_URL=http://localhost:8083/api
 
   reverse-proxy:
     image: nginx
@@ -43,4 +59,6 @@ services:
       - videostreaming-service
       - watchlist-service
       - frontend
-      - api-gateway 
+      - api-gateway
+    environment:
+      - NGINX_PORT=80
