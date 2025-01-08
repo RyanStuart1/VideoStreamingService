@@ -28,6 +28,14 @@ jobs:
 
       - name: Build Docker image for User Service
         run: docker build -t userauthentication-service ./userauthentication-service
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push User authentication Service to Docker Hub
+        run: |
+          docker tag userauthentication-service ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
       
  # Video Service Job
  videostreaming-service:
@@ -49,6 +57,15 @@ jobs:
      - name: Build Docker image for Video Service
        run: docker build -t video-service ./videostreaming-service
 
+     - name: Log in to Docker Hub
+       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+     - name: Push video streaming Service to Docker Hub
+       run: |
+         docker tag videostreaming-service ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
+         docker push ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
+     
+
  # API Gateway Job
  api-gateway:
    name: 🚪 API Gateway - Build and Push Docker Image
@@ -68,6 +85,15 @@ jobs:
 
      - name: Build Docker image for API Gateway
        run: docker build -t api-gateway ./api-gateway
+    
+     - name: Log in to Docker Hub
+       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+     - name: Push API Gateway to Docker Hub
+       run: |
+         docker tag api-gateway ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+         docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+     
 
  # Watchlist service Job
  watchlist-service:
@@ -89,6 +115,14 @@ jobs:
      - name: Build Docker image for watchlist service
        run: docker build -t watchlist-service ./watchlist-service
 
+     - name: Log in to Docker Hub
+       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+     - name: Push watchlist Service to Docker Hub
+       run: |
+         docker tag watchlist-service ${{ secrets.DOCKER_USERNAME }}/watchlist-service:latest
+         docker push ${{ secrets.DOCKER_USERNAME }}/watchlist-service:latest   
+
  # Frontend Service Job
  frontend:
    name: 💻 Frontend - Build and Push Docker Image
@@ -108,3 +142,11 @@ jobs:
 
      - name: Build Docker image for Frontend
        run: docker build -t frontend ./frontend
+
+     - name: Log in to Docker Hub
+       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+     - name: Push Frontend to Docker Hub
+       run: |
+         docker tag frontend ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+         docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest   
