@@ -17,16 +17,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug directory
-        run: ls -la ./backend
+      - name: Debug npm install
+        run: |
+          echo "Listing contents of working directory"
+          ls -la ./backend/userauthentication-service
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Configure npm registry
+        run: npm config set registry https://registry.npmjs.org/
+
+      - name: Clean npm cache
+        run: npm cache clean --force
+
+      - name: Install dependencies with retry
+        run: |
+          for i in {1..5}; do
+            npm install && break || sleep 10;
+          done
         working-directory: ./backend/userauthentication-service
 
       - name: Build Docker image
@@ -40,6 +51,7 @@ jobs:
           docker tag userauthentication-service ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
 
+  # video streaming Service       
   videostreaming-service:
     name: 🎥 Video Streaming Service - Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -47,16 +59,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug directory
-        run: ls -la ./backend
+      - name: Debug npm install
+        run: |
+          echo "Listing contents of working directory"
+          ls -la ./backend/videostreaming-service
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Configure npm registry
+        run: npm config set registry https://registry.npmjs.org/
+
+      - name: Clean npm cache
+        run: npm cache clean --force
+
+      - name: Install dependencies with retry
+        run: |
+          for i in {1..5}; do
+            npm install && break || sleep 10;
+          done
         working-directory: ./backend/videostreaming-service
 
       - name: Build Docker image
@@ -69,6 +92,7 @@ jobs:
         run: |
           docker tag videostreaming-service ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/videostreaming-service:latest
+
   # API Gateway
   api-gateway:
     name: 🚪 API Gateway - Build and Push Docker Image
