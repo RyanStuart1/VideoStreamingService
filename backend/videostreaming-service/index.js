@@ -3,40 +3,39 @@ const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3001; // Use environment variable or fallback
+const port = process.env.PORT || 3001;
 
 // MongoDB configuration
-const mongoURI = process.env.MONGO_URI || 'mongodb://3.87.2.83:27017'; // Replace <EC2-PUBLIC-IP> with the public IP or DNS hostname of your EC2 instance
-const dbName = process.env.MONGO_DB_NAME || 'VideoStreamingDB'; // Database name
-const collectionName = process.env.MONGO_COLLECTION_NAME || 'VideosMetaData'; // Collection name
+const mongoURI = process.env.MONGO_URI || 'mongodb://3.87.2.83:27017'; // Public IP of MongoDB EC2 instance
+const dbName = process.env.MONGO_DB_NAME || 'VideoStreamingDB';
+const collectionName = process.env.MONGO_COLLECTION_NAME || 'VideosMetaData';
 
-// MongoDB client instance
 const client = new MongoClient(mongoURI);
+let collection;
 
-let collection; // MongoDB collection reference
-
-// Connect to MongoDB
-client.connect()
-  .then(() => {
+// Connect to MongoDB with retries
+async function connectToMongoDB() {
+  try {
+    await client.connect();
     console.log('Connected to MongoDB');
     const db = client.db(dbName);
-    collection = db.collection(collectionName); // Reference to the collection
-  })
-  .catch(err => {
-    console.error('Failed to connect to MongoDB', err);
-  });
+    collection = db.collection(collectionName);
+  } catch (error) {
+    console.error('Failed to connect to MongoDB. Retrying in 5 seconds...', error);
+    setTimeout(connectToMongoDB, 5000); // Retry connection after 5 seconds
+  }
+}
+
+connectToMongoDB();
 
 // Route to fetch all video metadata
 app.get('/videos', async (req, res) => {
   try {
-    console.log('Fetching all video metadata from MongoDB');
-    const videos = await collection.find({}).toArray(); // Fetch all documents in the collection
+    const videos = await collection.find({}).toArray();
     if (videos.length === 0) {
-      console.warn('No video metadata found in the database.');
       return res.status(404).json({ error: 'No video metadata found' });
     }
-    console.log('Fetched videos:', videos);
-    res.json(videos); // Respond with all video metadata
+    res.json(videos);
   } catch (error) {
     console.error('Error fetching video metadata:', error);
     res.status(500).json({ error: 'Failed to fetch video metadata' });
@@ -46,24 +45,24 @@ app.get('/videos', async (req, res) => {
 // Route to fetch metadata for a specific video by ID
 app.get('/videos/:id', async (req, res) => {
   try {
-    const videoId = req.params.id; // Video ID from the request parameter
-    console.log(`Fetching metadata for video with ID: ${videoId}`);
+    const videoId = req.params.id;
+    if (!ObjectId.isValid(videoId)) {
+      return res.status(400).json({ error: 'Invalid video ID format' });
+    }
 
-    const video = await collection.findOne({ _id: new ObjectId(videoId) }); // Find video by ID
+    const video = await collection.findOne({ _id: new ObjectId(videoId) });
     if (!video) {
-      console.warn(`Video with ID ${videoId} not found.`);
       return res.status(404).json({ error: 'Video metadata not found' });
     }
-    console.log('Fetched video:', video);
-    res.json(video); // Respond with specific video metadata
+    res.json(video);
   } catch (error) {
     console.error('Error fetching video metadata:', error);
     res.status(500).json({ error: 'Failed to fetch video metadata' });
   }
 });
 
-// Start the server with logging
+// Start the server
 app.listen(port, () => {
-  console.log(`MongoDB URI: ${mongoURI}`);
   console.log(`Video Metadata Service running on port ${port}`);
+  console.log(`MongoDB URI: ${mongoURI}`);
 });

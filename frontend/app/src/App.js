@@ -15,7 +15,7 @@ function App() {
         const usersResponse = await axios.get('/api/users');
         setUsers(usersResponse.data);
 
-        const videosResponse = await axios.get('/api/videos');
+        const videosResponse = await axios.get('http://3.80.31.159:3001/videos');
         setVideos(videosResponse.data);
 
         const watchlistResponse = await axios.get('/api/watchlist');
