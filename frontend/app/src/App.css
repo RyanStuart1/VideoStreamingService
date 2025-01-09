@@ -1,38 +1,89 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #141414; /* Dark Netflix-like background */
+  color: #fff;
+}
+
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-family: Arial, sans-serif;
   color: white;
+  background-color: #141414;
+  padding: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+h1, h3 {
+  color: #e50914;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+.users-list li, .watchlist li {
+  background-color: #333;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.video-player {
+  margin: 20px 0;
+}
+
+.video-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.video-item {
+  background-color: #333;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.video-item:hover {
+  transform: scale(1.05);
+  background-color: #444;
+}
+
+.video-item h4 {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+/* Watchlist section */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin: 8px 0;
+  padding: 10px;
+  background: #333;
+  border-radius: 8px;
+}
+
+/* Users Section */
+ul li {
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .video-player video {
+    max-width: 100%;
+    height: auto;
   }
-  to {
-    transform: rotate(360deg);
+
+  .video-item {
+    flex: 0 0 80%; /* Make each video take more space on small screens */
   }
 }

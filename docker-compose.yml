@@ -9,14 +9,14 @@ services:
       - AWS_REGION=us-east-1
       - DYNAMO_TABLE_NAME=UserAuthenticationData
 
-videostreaming-service:
-  build: ./backend/videostreaming-service
-  ports:
-    - "3001:3001"
-  environment:
-    - AWS_REGION=us-east-1
-  volumes:
-    - ~/.aws:/root/.aws  # Mount the AWS credentials directory
+  videostreaming-service:
+    build: ./backend/videostreaming-service
+    ports:
+      - "3001:3001"
+    environment:
+      - AWS_REGION=us-east-1
+    volumes:
+      - ~/.aws:/root/.aws  # Mount the AWS credentials directory
 
 
   watchlist-service:

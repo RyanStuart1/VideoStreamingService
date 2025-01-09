@@ -6,9 +6,9 @@ function App() {
   const [users, setUsers] = useState([]);
   const [videos, setVideos] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
 
+  // Fetch data from APIs
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -20,41 +20,58 @@ function App() {
 
         const watchlistResponse = await axios.get('/api/watchlist');
         setWatchlist(watchlistResponse.data);
-
-        setLoading(false);
       } catch (err) {
-        setError('Failed to load data');
+        console.error('Failed to fetch data:', err);
       }
     };
     fetchData();
   }, []);
 
-  if (loading) return <p>Loading...</p>; 
-  if (error) return <p>{error}</p>;
-
   return (
-    <div>
+    <div className="App">
+      {/* Users Section */}
       <h1>Users</h1>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>{user.name} ({user.email})</li>
+      <ul className="users-list">
+        {users.map((user) => (
+          <li key={user.id}>
+            {user.name} ({user.email})
+          </li>
         ))}
       </ul>
 
-      <h1>Videos</h1>
-      {videos.map(video => (
-        <div key={video.id}>
-          <h2>{video.title}</h2>
-          <video width={800} height={500} controls loop autoPlay muted>
-          <source src={`/videos/${video.filename}`} type="video/mp4" />
+      {/* Video Player Section */}
+      <h1>Video Streaming Application</h1>
+      {selectedVideo && (
+        <div className="video-player">
+          <h2>{selectedVideo.title}</h2>
+          <video controls width="800" height="450">
+            <source src={selectedVideo.url} type="video/mp4" />
+            Your browser does not support the video tag.
           </video>
         </div>
-      ))}
+      )}
 
+      {/* Video List */}
+      <div className="video-list">
+        <h3>Available Videos</h3>
+        {videos.map((video) => (
+          <div
+            key={video.id}
+            className="video-item"
+            onClick={() => setSelectedVideo(video)} // Update selectedVideo on click
+          >
+            {video.title}
+          </div>
+        ))}
+      </div>
+
+      {/* Watchlist Section */}
       <h1>Watchlist</h1>
-      <ul>
-        {watchlist.map(item => (
-          <li key={item.id}>{item.title} - Status: {item.status}</li>
+      <ul className="watchlist">
+        {watchlist.map((item) => (
+          <li key={item.id}>
+            {item.title} - Status: {item.status}
+          </li>
         ))}
       </ul>
     </div>
