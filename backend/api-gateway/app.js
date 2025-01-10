@@ -15,6 +15,8 @@ app.get('/api/users', async (req, res) => {
     const response = await axios.get(`${USER_SERVICE_URL}/users`);
     res.json(response.data);
   } catch (error) {
+    console.error('Error fetching users from userAuthentication-service:', error.message);
+    console.error('Error details:', error.response?.data || error);
     res.status(500).send('Error fetching users');
   }
 });
@@ -24,6 +26,8 @@ app.get('/api/videos', async (req, res) => {
     const response = await axios.get(`${VIDEO_SERVICE_URL}/videos`);
     res.json(response.data);
   } catch (error) {
+    console.error('Error fetching videos from videoStreaming-service:', error.message);
+    console.error('Error details:', error.response?.data || error);
     res.status(500).send('Error fetching videos');
   }
 });
@@ -33,6 +37,8 @@ app.get('/api/watchlist', async (req, res) => {
     const response = await axios.get(`${WATCHLIST_SERVICE_URL}/watchlist`);
     res.json(response.data);
   } catch (error) {
+    console.error('Error fetching watchlist from watchlist-service:', error.message);
+    console.error('Error details:', error.response?.data || error);
     res.status(500).send('Error fetching watchlist');
   }
 });
