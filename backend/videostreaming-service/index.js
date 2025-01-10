@@ -7,9 +7,9 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // MongoDB configuration
-const mongoURI = process.env.MONGO_URI || 'mongodb://18.212.56.139:27017'; // Public IP of MongoDB EC2 instance
-const dbName = process.env.MONGO_DB_NAME || 'VideoStreamingDB';
-const collectionName = process.env.MONGO_COLLECTION_NAME || 'VideosMetaData';
+const mongoURI = process.env.MONGO_URI; // Public IP of MongoDB EC2 instance
+const dbName = process.env.MONGO_DB_NAME;
+const collectionName = process.env.MONGO_COLLECTION_NAME;
 
 const client = new MongoClient(mongoURI);
 let collection;
