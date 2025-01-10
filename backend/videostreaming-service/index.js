@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
 const { spawn } = require('child_process');
 require('dotenv').config();
 
@@ -22,12 +22,18 @@ async function connectToMongoDB() {
     const db = client.db(dbName);
     collection = db.collection(collectionName);
   } catch (error) {
-    console.error('Failed to connect to MongoDB. Retrying in 5 seconds...', error);
-    setTimeout(connectToMongoDB, 5000); // Retry connection after 5 seconds
+    console.error('Failed to connect to MongoDB:', error);
+    process.exit(1); // Exit the process on failure
   }
 }
 
 connectToMongoDB();
+
+// Middleware to log requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 // Route to fetch all video metadata
 app.get('/videos', async (req, res) => {
@@ -46,16 +52,15 @@ app.get('/videos', async (req, res) => {
 // Route to fetch metadata for a specific video by ID
 app.get('/videos/:id', async (req, res) => {
   try {
-    const videoId = req.params.id;
-    if (!ObjectId.isValid(videoId)) {
-      return res.status(400).json({ error: 'Invalid video ID format' });
-    }
+    const videoId = req.params.id; // Get the ID from the URL
 
-    const video = await collection.findOne({ _id: new ObjectId(videoId) });
+    // Query MongoDB using the string ID
+    const video = await collection.findOne({ _id: videoId });
     if (!video) {
       return res.status(404).json({ error: 'Video metadata not found' });
     }
-    res.json(video);
+
+    res.json(video); // Return the video metadata
   } catch (error) {
     console.error('Error fetching video metadata:', error);
     res.status(500).json({ error: 'Failed to fetch video metadata' });
@@ -66,27 +71,29 @@ app.get('/videos/:id', async (req, res) => {
 app.get('/stream/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
-    if (!ObjectId.isValid(videoId)) {
-      return res.status(400).json({ error: 'Invalid video ID format' });
-    }
 
-    const video = await collection.findOne({ _id: new ObjectId(videoId) });
+    // Query MongoDB using the string ID
+    const video = await collection.findOne({ _id: videoId });
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
 
-    const s3Path = video.s3_path; // Full S3 URL for the video
+    const s3Path = video.url; // Use the S3 URL from the database
+    if (!s3Path) {
+      return res.status(400).json({ error: 'S3 path is missing for this video' });
+    }
+
     const streamKey = videoId; // Use the video ID as the RTMP stream key
-    const rtmpUrl = `rtmp://localhost/vod/${streamKey}`;
+    const rtmpUrl = `rtmp://<your-ec2-public-ip>/vod/${streamKey}`; // Replace <your-ec2-public-ip> with your actual public IP or DNS
 
     // Spawn FFmpeg to stream video
     const ffmpeg = spawn("ffmpeg", [
-      "-re",               // Read input in real-time
-      "-i", s3Path,        // Input file (S3 URL)
-      "-c:v", "copy",      // Copy video codec
-      "-c:a", "copy",      // Copy audio codec
-      "-f", "flv",         // Format for RTMP
-      rtmpUrl              // Output RTMP URL
+      "-re",
+      "-i", s3Path,
+      "-c:v", "copy",
+      "-c:a", "copy",
+      "-f", "flv",
+      rtmpUrl
     ]);
 
     ffmpeg.stderr.on("data", (data) => {
@@ -94,17 +101,25 @@ app.get('/stream/:id', async (req, res) => {
     });
 
     ffmpeg.on("close", (code) => {
-      console.log(`FFmpeg exited with code ${code}`);
+      if (code !== 0) {
+        console.error(`FFmpeg exited with code ${code}`);
+        return res.status(500).json({ error: `FFmpeg exited with code ${code}` });
+      }
     });
 
     res.json({
       message: "Streaming started",
-      rtmpUrl: rtmpUrl,
+      rtmpUrl: rtmpUrl, // Return the public RTMP URL
     });
   } catch (error) {
-    console.error("Error starting stream:", error);
-    res.status(500).json({ error: "Failed to start streaming" });
+    console.error('Error starting stream:', error);
+    res.status(500).json({ error: 'Failed to start streaming' });
   }
+});
+
+// Default route for invalid endpoints
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // Start the server
