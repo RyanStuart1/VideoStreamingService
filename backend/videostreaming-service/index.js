@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient } = require('mongodb'); // Removed ObjectId since it's not needed for string _id
+const { MongoClient } = require('mongodb'); // Removed ObjectId import since we are using string _id
 const { spawn } = require('child_process');
 require('dotenv').config();
 
@@ -66,7 +66,7 @@ app.get('/videos/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
 
-    // Query MongoDB with string _id
+    // Query MongoDB using string _id
     const video = await collection.findOne({ _id: videoId });
 
     if (!video) {
@@ -85,7 +85,7 @@ app.get('/stream/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
 
-    // Query MongoDB with string _id
+    // Query MongoDB using string _id
     const video = await collection.findOne({ _id: videoId });
 
     if (!video) {
@@ -97,26 +97,9 @@ app.get('/stream/:id', async (req, res) => {
       return res.status(400).json({ error: 'S3 path is missing for this video' });
     }
 
-    const streamKey = videoId; // Use the video ID as the RTMP stream key
-    const rtmpUrl = `rtmp://54.197.170.44/vod/${streamKey}`; // Replace with your EC2 public IP or DNS
-
-    // Spawn FFmpeg to stream video
-    const ffmpeg = spawn('ffmpeg', ['-re', '-i', s3Path, '-c:v', 'copy', '-c:a', 'copy', '-f', 'flv', rtmpUrl]);
-
-    ffmpeg.stderr.on('data', (data) => {
-      console.error(`FFmpeg error: ${data}`);
-    });
-
-    ffmpeg.on('close', (code) => {
-      if (code !== 0) {
-        console.error(`FFmpeg exited with code ${code}`);
-        return res.status(500).json({ error: `FFmpeg exited with code ${code}` });
-      }
-    });
-
     res.json({
       message: 'Streaming started',
-      rtmpUrl: rtmpUrl, // Return the public RTMP URL
+      rtmpUrl: s3Path, // Return the public S3 URL
     });
   } catch (error) {
     console.error('Error starting stream:', error);
