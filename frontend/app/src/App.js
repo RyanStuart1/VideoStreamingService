@@ -7,6 +7,7 @@ function App() {
   const [videos, setVideos] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Fetch data from APIs
   useEffect(() => {
@@ -26,6 +27,24 @@ function App() {
     };
     fetchData();
   }, []);
+
+  // Function to start streaming a video
+  const startStream = async (videoId) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`/stream/${videoId}`);
+      setSelectedVideo({
+        id: videoId,
+        title: videos.find((video) => video.id === videoId)?.title || 'Selected Video',
+        url: response.data.rtmpUrl,
+      });
+    } catch (err) {
+      console.error('Failed to start stream:', err);
+      alert('Failed to load video. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="App" style={{ backgroundColor: 'black', color: 'red', textAlign: 'center' }}>
@@ -70,12 +89,15 @@ function App() {
               color: 'white',
               backgroundColor: 'black',
             }}
-            onClick={() => setSelectedVideo(video)} // Set the selected video
+            onClick={() => startStream(video.id)} // Fetch the stream URL and set the selected video
           >
             {video.title}
           </div>
         ))}
       </div>
+
+      {/* Loading Indicator */}
+      {loading && <p>Loading video...</p>}
 
       {/* Watchlist Section */}
       <h1>Watchlist</h1>
