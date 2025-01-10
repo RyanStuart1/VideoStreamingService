@@ -78,7 +78,10 @@ app.get('/videos/:id', async (req, res) => {
     console.error('Error fetching video metadata:', error);
 
     // Handle invalid ObjectId format
-    if (error instanceof Error && error.message.includes('Argument passed in must be a string of 12 bytes or a string of 24 hex characters')) {
+    if (
+      error instanceof Error &&
+      error.message.includes('Argument passed in must be a string of 12 bytes or a string of 24 hex characters')
+    ) {
       return res.status(400).json({ error: 'Invalid video ID format' });
     }
 
