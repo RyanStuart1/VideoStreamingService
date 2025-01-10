@@ -13,6 +13,9 @@ services:
       - "3001:3001"
     environment:
       - AWS_REGION=us-east-1
+      - MONGO_URI=mongodb://3.82.102.48:27017
+      - MONGO_DB_NAME=VideoStreamingDB
+      - MONGO_COLLECTION_NAME=VideosMetaData
     volumes:
       - ~/.aws:/root/.aws  # Mount the AWS credentials directory
 
