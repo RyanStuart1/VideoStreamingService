@@ -15,6 +15,7 @@ function App() {
     const fetchData = async () => {
       setIsFetching(true);
       try {
+        console.log('Fetching users, videos, and watchlist data...');
         const usersResponse = await axios.get('/api/users'); // Relative path
         setUsers(usersResponse.data);
 
@@ -23,6 +24,8 @@ function App() {
 
         const watchlistResponse = await axios.get('/api/watchlist'); // Relative path
         setWatchlist(watchlistResponse.data);
+
+        console.log('Data fetched successfully');
       } catch (err) {
         console.error('Failed to fetch data:', err);
       } finally {
@@ -34,10 +37,15 @@ function App() {
 
   // Function to start streaming a video
   const startStream = async (videoId) => {
+    const trimmedVideoId = videoId.trim(); // Ensure no leading/trailing spaces
+    console.log('Requesting video with ID:', trimmedVideoId); // Debugging log
+
     setLoading(true);
     try {
-      const response = await axios.get(`/api/videos/${videoId}`); // Relative path
+      const response = await axios.get(`/api/videos/${trimmedVideoId}`); // Relative path
       const videoData = response.data;
+
+      console.log('Video metadata received:', videoData); // Debugging log
 
       setSelectedVideo({
         id: videoData._id,
@@ -46,7 +54,13 @@ function App() {
       });
     } catch (err) {
       console.error('Failed to load video metadata:', err);
-      alert('Failed to load video. Please try again later.');
+
+      // Check if the error is a 404
+      if (err.response && err.response.status === 404) {
+        alert('Video not found. Please select another video.');
+      } else {
+        alert('Failed to load video. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
@@ -54,7 +68,9 @@ function App() {
 
   return (
     <div className="App" style={{ backgroundColor: 'black', color: 'red', textAlign: 'center' }}>
-      {isFetching ? <p>Loading data...</p> : (
+      {isFetching ? (
+        <p>Loading data...</p>
+      ) : (
         <>
           {/* Users Section */}
           <h1>Users</h1>
@@ -69,15 +85,15 @@ function App() {
           {/* Video Streaming Section */}
           <h1>Video Streaming Application</h1>
           {selectedVideo ? (
-          <div className="video-player" style={{ margin: '20px auto' }}>
-            <h2>{selectedVideo.title}</h2>
-            <video controls width="800" height="450">
-              <source src={selectedVideo.url} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
+            <div className="video-player" style={{ margin: '20px auto' }}>
+              <h2>{selectedVideo.title}</h2>
+              <video controls width="800" height="450">
+                <source src={selectedVideo.url} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           ) : (
-          <p>Select a video to play</p>
+            <p>Select a video to play</p>
           )}
 
           {/* Video List */}
