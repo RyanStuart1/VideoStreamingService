@@ -38,14 +38,16 @@ function App() {
   const startStream = async (videoId) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_GATEWAY_URL}/api/stream/${videoId}`);
+      const response = await axios.get(`${API_GATEWAY_URL}/api/videos/${videoId}`);
+      const videoData = response.data;
+  
       setSelectedVideo({
-        id: videoId,
-        title: videos.find((video) => video._id === videoId)?.title || 'Selected Video',
-        url: response.data.rtmpUrl, // URL returned by the API Gateway
+        id: videoData._id,
+        title: videoData.title,
+        url: videoData.url, // Use the S3 URL returned by the API
       });
     } catch (err) {
-      console.error('Failed to start stream:', err);
+      console.error('Failed to load video metadata:', err);
       alert('Failed to load video. Please try again later.');
     } finally {
       setLoading(false);
@@ -69,16 +71,17 @@ function App() {
           {/* Video Streaming Section */}
           <h1>Video Streaming Application</h1>
           {selectedVideo ? (
-            <div className="video-player" style={{ margin: '20px auto' }}>
-              <h2>{selectedVideo.title}</h2>
-              <video controls width="800" height="450">
-                <source src={selectedVideo.url} type="application/x-mpegURL" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
+          <div className="video-player" style={{ margin: '20px auto' }}>
+            <h2>{selectedVideo.title}</h2>
+            <video controls width="800" height="450">
+              <source src={selectedVideo.url} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
           ) : (
-            <p>Select a video to play</p>
+          <p>Select a video to play</p>
           )}
+
 
           {/* Video List */}
           <div className="video-list" style={{ margin: '20px auto', padding: '10px' }}>

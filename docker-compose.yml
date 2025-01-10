@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   userauthentication-service:
     build: ./backend/userauthentication-service
