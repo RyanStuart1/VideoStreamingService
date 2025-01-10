@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-const API_GATEWAY_URL = 'http://54.87.201.42:3003'; // API Gateway URL
-
 function App() {
   const [users, setUsers] = useState([]);
   const [videos, setVideos] = useState([]);
@@ -17,13 +15,13 @@ function App() {
     const fetchData = async () => {
       setIsFetching(true);
       try {
-        const usersResponse = await axios.get(`${API_GATEWAY_URL}/api/users`);
+        const usersResponse = await axios.get('/api/users'); // Relative path
         setUsers(usersResponse.data);
 
-        const videosResponse = await axios.get(`${API_GATEWAY_URL}/api/videos`);
+        const videosResponse = await axios.get('/api/videos'); // Relative path
         setVideos(videosResponse.data);
 
-        const watchlistResponse = await axios.get(`${API_GATEWAY_URL}/api/watchlist`);
+        const watchlistResponse = await axios.get('/api/watchlist'); // Relative path
         setWatchlist(watchlistResponse.data);
       } catch (err) {
         console.error('Failed to fetch data:', err);
@@ -38,9 +36,9 @@ function App() {
   const startStream = async (videoId) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_GATEWAY_URL}/api/videos/${videoId}`);
+      const response = await axios.get(`/api/videos/${videoId}`); // Relative path
       const videoData = response.data;
-  
+
       setSelectedVideo({
         id: videoData._id,
         title: videoData.title,
@@ -81,7 +79,6 @@ function App() {
           ) : (
           <p>Select a video to play</p>
           )}
-
 
           {/* Video List */}
           <div className="video-list" style={{ margin: '20px auto', padding: '10px' }}>
