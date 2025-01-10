@@ -15,7 +15,7 @@ function App() {
         const usersResponse = await axios.get('/api/users');
         setUsers(usersResponse.data);
 
-        const videosResponse = await axios.get('api/videos');
+        const videosResponse = await axios.get('/api/videos');
         setVideos(videosResponse.data);
 
         const watchlistResponse = await axios.get('/api/watchlist');
@@ -28,7 +28,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
+    <div className="App" style={{ backgroundColor: 'black', color: 'red', textAlign: 'center' }}>
       {/* Users Section */}
       <h1>Users</h1>
       <ul className="users-list">
@@ -39,26 +39,38 @@ function App() {
         ))}
       </ul>
 
-      {/* Video Player Section */}
+      {/* Video Streaming Section */}
       <h1>Video Streaming Application</h1>
-      {selectedVideo && (
-        <div className="video-player">
+      {selectedVideo ? (
+        <div className="video-player" style={{ margin: '20px auto' }}>
           <h2>{selectedVideo.title}</h2>
           <video controls width="800" height="450">
-            <source src={selectedVideo.url} type="video/mp4" />
+            <source src={selectedVideo.url} type="application/x-mpegURL" />
             Your browser does not support the video tag.
           </video>
         </div>
+      ) : (
+        <p>Select a video to play</p>
       )}
 
       {/* Video List */}
-      <div className="video-list">
+      <div className="video-list" style={{ margin: '20px auto', padding: '10px' }}>
         <h3>Available Videos</h3>
         {videos.map((video) => (
           <div
             key={video.id}
             className="video-item"
-            onClick={() => setSelectedVideo(video)} // Update selectedVideo on click
+            style={{
+              cursor: 'pointer',
+              margin: '10px',
+              padding: '10px',
+              border: '1px solid red',
+              borderRadius: '5px',
+              display: 'inline-block',
+              color: 'white',
+              backgroundColor: 'black',
+            }}
+            onClick={() => setSelectedVideo(video)} // Set the selected video
           >
             {video.title}
           </div>
