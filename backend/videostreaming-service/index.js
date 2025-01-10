@@ -104,7 +104,7 @@ app.get('/stream/:id', async (req, res) => {
     }
 
     const streamKey = videoId; // Use the video ID as the RTMP stream key
-    const rtmpUrl = `rtmp://54.87.201.42/vod/${streamKey}`; // Replace with your EC2 public IP or DNS
+    const rtmpUrl = `rtmp://54.197.170.44/vod/${streamKey}`; // Replace with your EC2 public IP or DNS
 
     // Spawn FFmpeg to stream video
     const ffmpeg = spawn('ffmpeg', ['-re', '-i', s3Path, '-c:v', 'copy', '-c:a', 'copy', '-f', 'flv', rtmpUrl]);
