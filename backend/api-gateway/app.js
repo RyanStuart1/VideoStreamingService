@@ -6,9 +6,9 @@ const cors = require('cors');
 app.use(cors());  // Enable CORS so frontend can access this gateway
 app.use(express.json());
 
-const USER_SERVICE_URL = 'http://userAuthentication-service:3000';
-const VIDEO_SERVICE_URL = 'http://videoStreaming-service:3001';
-const WATCHLIST_SERVICE_URL = 'http://watchlist-service:3002';
+const USER_SERVICE_URL = 'http://54.174.222.249:3000';
+const VIDEO_SERVICE_URL = 'http://54.174.222.249:3001';
+const WATCHLIST_SERVICE_URL = 'http://54.174.222.249:3002';
 
 app.get('/api/users', async (req, res) => {
   try {
