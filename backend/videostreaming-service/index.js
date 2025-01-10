@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb'); // Import ObjectId
+const { MongoClient } = require('mongodb'); // Removed ObjectId since it's not needed for string _id
 const { spawn } = require('child_process');
 require('dotenv').config();
 
@@ -66,8 +66,8 @@ app.get('/videos/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
 
-    // Convert string to ObjectId and query MongoDB
-    const video = await collection.findOne({ _id: new ObjectId(videoId) });
+    // Query MongoDB with string _id
+    const video = await collection.findOne({ _id: videoId });
 
     if (!video) {
       return res.status(404).json({ error: 'Video metadata not found' });
@@ -76,15 +76,6 @@ app.get('/videos/:id', async (req, res) => {
     res.json(video); // Return the video metadata
   } catch (error) {
     console.error('Error fetching video metadata:', error);
-
-    // Handle invalid ObjectId format
-    if (
-      error instanceof Error &&
-      error.message.includes('Argument passed in must be a string of 12 bytes or a string of 24 hex characters')
-    ) {
-      return res.status(400).json({ error: 'Invalid video ID format' });
-    }
-
     res.status(500).json({ error: 'Failed to fetch video metadata' });
   }
 });
@@ -94,8 +85,8 @@ app.get('/stream/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
 
-    // Convert string to ObjectId and query MongoDB
-    const video = await collection.findOne({ _id: new ObjectId(videoId) });
+    // Query MongoDB with string _id
+    const video = await collection.findOne({ _id: videoId });
 
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
