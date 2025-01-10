@@ -7,23 +7,33 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // MongoDB configuration
-const mongoURI = process.env.MONGO_URI || 'mongodb://44.210.112.33:27017'; // Public IP of MongoDB EC2 instance
+const mongoURI = process.env.MONGO_URI || 'mongodb://18.212.56.139:27017'; // Public IP of MongoDB EC2 instance
 const dbName = process.env.MONGO_DB_NAME || 'VideoStreamingDB';
 const collectionName = process.env.MONGO_COLLECTION_NAME || 'VideosMetaData';
 
 const client = new MongoClient(mongoURI);
 let collection;
 
-// Connect to MongoDB with retries
+// Function to connect to MongoDB with retries
 async function connectToMongoDB() {
-  try {
-    await client.connect();
-    console.log('Connected to MongoDB');
-    const db = client.db(dbName);
-    collection = db.collection(collectionName);
-  } catch (error) {
-    console.error('Failed to connect to MongoDB:', error);
-    process.exit(1); // Exit the process on failure
+  const maxRetries = 5; // Maximum number of retries
+  const retryDelay = 5000; // Delay in milliseconds between retries
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await client.connect();
+      console.log('Connected to MongoDB');
+      const db = client.db(dbName);
+      collection = db.collection(collectionName);
+      return; // Exit the loop if connection is successful
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed: Failed to connect to MongoDB. Retrying in ${retryDelay / 1000} seconds...`);
+      if (attempt === maxRetries) {
+        console.error('Max retries reached. Could not connect to MongoDB. Exiting.');
+        process.exit(1); // Exit only if retries are exhausted
+      }
+      await new Promise((resolve) => setTimeout(resolve, retryDelay)); // Wait before retrying
+    }
   }
 }
 
@@ -84,7 +94,7 @@ app.get('/stream/:id', async (req, res) => {
     }
 
     const streamKey = videoId; // Use the video ID as the RTMP stream key
-    const rtmpUrl = `rtmp://<your-ec2-public-ip>/vod/${streamKey}`; // Replace <your-ec2-public-ip> with your actual public IP or DNS
+    const rtmpUrl = `rtmp://54.87.201.42/vod/${streamKey}`; // Replace <your-ec2-public-ip> with your actual public IP or DNS
 
     // Spawn FFmpeg to stream video
     const ffmpeg = spawn("ffmpeg", [
