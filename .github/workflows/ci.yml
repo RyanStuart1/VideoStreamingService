@@ -184,3 +184,21 @@ jobs:
         run: |
           docker tag frontend ${{ secrets.DOCKER_USERNAME }}/frontend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
+  reverse-proxy:
+    name: 🌐 NGINX Reverse Proxy - Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build NGINX Docker image
+        run: docker build -t reverse-proxy -f Dockerfile.nginx .
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker image
+        run: |
+          docker tag reverse-proxy ${{ secrets.DOCKER_USERNAME }}/reverse-proxy:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/reverse-proxy:latest
