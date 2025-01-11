@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 });
 
 // Route to fetch all video metadata
-app.get('/api/videos', async (req, res) => {
+app.get('/videos', async (req, res) => {
   try {
     const videos = await collection.find({}).toArray();
     if (videos.length === 0) {
