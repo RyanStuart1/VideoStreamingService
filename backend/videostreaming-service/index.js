@@ -49,8 +49,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware to enable CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204); // Respond to preflight requests
+  }
+  next();
+});
+
 // Route to fetch all video metadata
-app.get('/videos', async (req, res) => {
+app.get('/api/videos', async (req, res) => {
   try {
     const videos = await collection.find({}).toArray();
     if (videos.length === 0) {
@@ -64,7 +75,7 @@ app.get('/videos', async (req, res) => {
 });
 
 // Route to fetch metadata for a specific video by ID
-app.get('/videos/:id', async (req, res) => {
+app.get('/api/videos/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
 
@@ -72,7 +83,6 @@ app.get('/videos/:id', async (req, res) => {
       return res.status(400).json({ error: 'Video ID is required' });
     }
 
-    // Convert to ObjectId if it looks like one
     const query = ObjectId.isValid(videoId) ? { _id: ObjectId(videoId) } : { _id: videoId };
     const video = await collection.findOne(query);
 
@@ -87,10 +97,14 @@ app.get('/videos/:id', async (req, res) => {
   }
 });
 
-// Route to stream video from S3
-app.get('/stream/:id', async (req, res) => {
+// Route to handle video streaming (redirect to Nginx)
+app.get('/api/stream/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
+
+    if (!videoId) {
+      return res.status(400).json({ error: 'Video ID is required' });
+    }
 
     const video = await collection.findOne({ _id: videoId });
 
@@ -98,25 +112,12 @@ app.get('/stream/:id', async (req, res) => {
       return res.status(404).json({ error: 'Video not found' });
     }
 
-    const s3Url = video.url;
-    const range = req.headers.range;
-
-    if (!range) {
-      return res.status(400).send('Requires Range header');
-    }
-
-    // Fetch video data from S3
-    const headers = { Range: range };
-    const response = await fetch(s3Url, { headers });
-
-    if (!response.ok) {
-      return res.status(response.status).send('Failed to fetch video from S3');
-    }
-
-    res.writeHead(response.status, response.headers.raw());
-    response.body.pipe(res); // Pipe video data to the client
+    // Redirect to Nginx for video streaming
+    const videoFileName = encodeURIComponent(video.url.split('/').pop());
+    const nginxUrl = `/videos/${videoFileName}`; // This should match the Nginx configuration
+    res.redirect(nginxUrl);
   } catch (error) {
-    console.error('Error streaming video:', error);
+    console.error('Error in stream endpoint:', error);
     res.status(500).json({ error: 'Failed to stream video' });
   }
 });
