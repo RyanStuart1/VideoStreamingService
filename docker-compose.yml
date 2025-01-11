@@ -19,7 +19,6 @@ services:
     volumes:
       - ~/.aws:/root/.aws  # Mount the AWS credentials directory
 
-
   watchlist-service:
     build: ./backend/watchlist-service
     ports:
@@ -50,12 +49,14 @@ services:
       - REACT_APP_API_URL=http://localhost:8083/api
 
   reverse-proxy:
-    image: nginx
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     ports:
-      - "8083:80"
+      - "8083:80"  # HTTP traffic
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./frontend/app/build:/usr/share/nginx/html
+      - ./frontend/app/build:/usr/share/nginx/html  # Serve frontend files
     depends_on:
       - userauthentication-service
       - videostreaming-service
