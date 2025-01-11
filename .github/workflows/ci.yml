@@ -188,9 +188,17 @@ jobs:
   reverse-proxy:
     name: 🌐 NGINX Reverse Proxy - Build and Push Docker Image
     runs-on: ubuntu-latest
+    needs: frontend # Ensure the frontend build completes first
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Verify frontend build exists
+        run: |
+          if [ ! -d ./frontend/app/build ]; then
+            echo "Error: Frontend build directory does not exist."
+            exit 1
+          fi
 
       - name: Build NGINX Docker image
         run: docker build -t reverse-proxy -f Dockerfile.nginx .
