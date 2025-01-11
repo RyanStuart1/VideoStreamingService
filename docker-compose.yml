@@ -13,7 +13,7 @@ services:
       - "3001:3001"
     environment:
       - AWS_REGION=us-east-1
-      - MONGO_URI=mongodb://34.201.67.51:27017
+      - MONGO_URI=mongodb://50.16.175.182:27017
       - MONGO_DB_NAME=VideoStreamingDB
       - MONGO_COLLECTION_NAME=VideosMetaData
     volumes:
@@ -46,7 +46,7 @@ services:
     depends_on:
       - api-gateway
     environment:
-      - REACT_APP_API_URL=http://localhost:8083/api
+      - REACT_APP_API_URL=http://98.85.96.246:8083/api
 
   reverse-proxy:
     build:
@@ -64,4 +64,4 @@ services:
       - frontend
       - api-gateway
     environment:
-      - NGINX_PORT=80
+      - NGINX_PORT=80 
