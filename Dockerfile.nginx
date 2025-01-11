@@ -5,7 +5,7 @@ FROM nginx:latest
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
 # Copy frontend build files into the NGINX web root
-COPY ./frontend/build /usr/share/nginx/html
+COPY ./frontend/app/build /usr/share/nginx/html
 
 # Expose port 80 for HTTP traffic
 EXPOSE 80
