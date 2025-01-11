@@ -1,7 +1,9 @@
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
-const fetch = require('node-fetch');
 require('dotenv').config();
+
+// Using dynamic import for node-fetch (compatible with node-fetch v3+)
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const app = express();
 const port = process.env.PORT || 3001;
