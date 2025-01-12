@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 // Using dynamic import for node-fetch (compatible with node-fetch v3+)
@@ -83,7 +83,8 @@ app.get('/api/videos/:id', async (req, res) => {
       return res.status(400).json({ error: 'Video ID is required' });
     }
 
-    const video = await collection.findOne({ _id: videoId });
+    const query = ObjectId.isValid(videoId) ? { _id: ObjectId(videoId) } : { _id: videoId };
+    const video = await collection.findOne(query);
 
     if (!video) {
       return res.status(404).json({ error: 'Video metadata not found' });
@@ -106,7 +107,7 @@ app.get('/api/stream/:id', async (req, res) => {
     }
 
     // Fetch video metadata from MongoDB
-    const video = await collection.findOne({ _id: videoId });
+    const video = await collection.findOne({ _id: ObjectId(videoId) });
 
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
