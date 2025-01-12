@@ -7,7 +7,7 @@ const { auth, registerUser, loginUser, getProfile } = require('../controllers/au
 router.use(
     cors({
       credentials: true,
-      origin: 'http://localhost:3004'
+      origin: 'http://98.85.96.246:3004'
     })
 )
 

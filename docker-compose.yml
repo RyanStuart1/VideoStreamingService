@@ -48,7 +48,7 @@ services:
   api-gateway:
     build: ./backend/api-gateway
     ports:
-      - "8083:3003"  # Exposing the API Gateway publicly on port 8083
+      - "3003:3003"  # Exposing the API Gateway publicly on port 8083
     depends_on:
       - userauthentication-service
       - videostreaming-service
