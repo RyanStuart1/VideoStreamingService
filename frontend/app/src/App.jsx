@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import { Toaster } from 'react-hot-toast';
 import { UserContextProvider } from './context/userContext';
+import VideoPlayerPage from './pages/VideoPlayerPage';
 
 axios.defaults.baseURL = 'http://localhost:3003';
 axios.defaults.withCredentials = true
@@ -91,6 +92,8 @@ function App() {
             <Route path='/register' element={<Register />} />
             <Route path='/login' element={<Login />} />
             <Route path='/dashboard' element={<Dashboard />} />
+            <Route path="/video/:id" element={<VideoPlayerPage />} />
+            <Route path="/videos" element={<VideoListPage videos={videos} />} />
           </Routes>
         </UserContextProvider>
           {/* Users Section */}
