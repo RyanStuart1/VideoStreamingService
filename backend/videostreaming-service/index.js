@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 // Using dynamic import for node-fetch (compatible with node-fetch v3+)
@@ -83,8 +83,7 @@ app.get('/api/videos/:id', async (req, res) => {
       return res.status(400).json({ error: 'Video ID is required' });
     }
 
-    const query = ObjectId.isValid(videoId) ? { _id: ObjectId(videoId) } : { _id: videoId };
-    const video = await collection.findOne(query);
+    const video = await collection.findOne({ _id: videoId });
 
     if (!video) {
       return res.status(404).json({ error: 'Video metadata not found' });
@@ -97,7 +96,7 @@ app.get('/api/videos/:id', async (req, res) => {
   }
 });
 
-// Route to handle video streaming (redirect to Nginx)
+// Route to handle video streaming
 app.get('/api/stream/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
@@ -106,16 +105,55 @@ app.get('/api/stream/:id', async (req, res) => {
       return res.status(400).json({ error: 'Video ID is required' });
     }
 
+    // Fetch video metadata from MongoDB
     const video = await collection.findOne({ _id: videoId });
 
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
 
-    // Redirect to Nginx for video streaming
-    const videoFileName = encodeURIComponent(video.url.split('/').pop());
-    const nginxUrl = `/videos/${videoFileName}`; // This should match the Nginx configuration
-    res.redirect(nginxUrl);
+    const range = req.headers.range;
+    if (!range) {
+      return res.status(400).send('Requires Range header');
+    }
+
+    const videoUrl = video.url; // Assuming the public URL is stored in MongoDB
+    const headResponse = await fetch(videoUrl, { method: 'HEAD' });
+
+    if (!headResponse.ok) {
+      return res.status(500).json({ error: 'Failed to fetch video metadata from S3' });
+    }
+
+    const videoSize = headResponse.headers.get('content-length');
+
+    // Parse Range
+    const CHUNK_SIZE = 10 ** 6; // 1MB
+    const start = Number(range.replace(/\D/g, ''));
+    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+
+    // Set response headers
+    const contentLength = end - start + 1;
+    const headers = {
+      'Content-Range': `bytes ${start}-${end}/${videoSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': contentLength,
+      'Content-Type': 'video/mp4',
+    };
+
+    res.writeHead(206, headers);
+
+    // Stream video chunk
+    const videoStream = await fetch(videoUrl, {
+      headers: {
+        Range: `bytes=${start}-${end}`,
+      },
+    });
+
+    if (!videoStream.ok) {
+      return res.status(500).json({ error: 'Failed to stream video chunk from S3' });
+    }
+
+    videoStream.body.pipe(res);
   } catch (error) {
     console.error('Error in stream endpoint:', error);
     res.status(500).json({ error: 'Failed to stream video' });
