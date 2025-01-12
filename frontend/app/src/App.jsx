@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import {Routes, Route} from 'react-router-dom';
+import axios from 'axios';
 import './App.css';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import { Toaster } from 'react-hot-toast';
 import { UserContextProvider } from './context/userContext';
-import api from './axios'; // Use centralized Axios instance
+
+axios.defaults.baseURL = 'http://localhost:3003';
+axios.defaults.withCredentials = true
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -23,17 +27,13 @@ function App() {
       setIsFetching(true);
       try {
         console.log('Fetching users, videos, and watchlist data...');
-
-        // Fetch users
-        const usersResponse = await api.get('/api/users'); // Centralized Axios
+        const usersResponse = await axios.get('/api/users'); // Relative path
         setUsers(usersResponse.data);
 
-        // Fetch videos
-        const videosResponse = await api.get('/api/videos');
+        const videosResponse = await axios.get('/api/videos'); // Relative path
         setVideos(videosResponse.data);
 
-        // Fetch watchlist
-        const watchlistResponse = await api.get('/api/watchlist');
+        const watchlistResponse = await axios.get('/api/watchlist'); // Relative path
         setWatchlist(watchlistResponse.data);
 
         console.log('Data fetched successfully');
@@ -43,21 +43,20 @@ function App() {
         setIsFetching(false);
       }
     };
-
     fetchData();
   }, []);
 
   // Function to start streaming a video
   const startStream = async (videoId) => {
     const trimmedVideoId = videoId.trim(); // Ensure no leading/trailing spaces
-    console.log('Requesting video with ID:', trimmedVideoId);
+    console.log('Requesting video with ID:', trimmedVideoId); // Debugging log
 
     setLoading(true);
     try {
-      const response = await api.get(`/api/videos/${trimmedVideoId}`); // Centralized Axios
+      const response = await axios.get(`/api/videos/${trimmedVideoId}`); // Relative path
       const videoData = response.data;
 
-      console.log('Video metadata received:', videoData);
+      console.log('Video metadata received:', videoData); // Debugging log
 
       setSelectedVideo({
         id: videoData._id,
@@ -67,7 +66,7 @@ function App() {
     } catch (err) {
       console.error('Failed to load video metadata:', err);
 
-      // Handle specific error cases
+      // Check if the error is a 404
       if (err.response && err.response.status === 404) {
         alert('Video not found. Please select another video.');
       } else {
@@ -84,21 +83,21 @@ function App() {
         <p>Loading data...</p>
       ) : (
         <>
-          <UserContextProvider>
-            <Navbar />
-            <Toaster position="bottom-right" toastOptions={{ duration: 2000 }} />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-            </Routes>
-          </UserContextProvider>
-
+        <UserContextProvider>
+          <Navbar />
+          <Toaster position='bottom-right' toastOptions={{duration: 2000}} />
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/register' element={<Register />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/dashboard' element={<Dashboard />} />
+          </Routes>
+        </UserContextProvider>
           {/* Users Section */}
           <h1>Users</h1>
           <ul className="users-list">
             {users.map((user) => (
-              <li key={user._id}>
+              <li key={user.id}>
                 {user.name} ({user.email})
               </li>
             ))}
@@ -149,7 +148,7 @@ function App() {
           <h1>Watchlist</h1>
           <ul className="watchlist">
             {watchlist.map((item) => (
-              <li key={item._id}>
+              <li key={item.id}>
                 {item.title} - Status: {item.status}
               </li>
             ))}

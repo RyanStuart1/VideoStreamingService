@@ -3,12 +3,11 @@ const router = express.Router();
 const cors = require('cors');
 const { auth, registerUser, loginUser, getProfile } = require('../controllers/authController')
 
-const USER_SERVICE_URL = 'http://98.85.96.246:3000';
-
+// middleware
 router.use(
     cors({
       credentials: true,
-      origin: USER_SERVICE_URL
+      origin: 'http://localhost:3004'
     })
 )
 

@@ -1,5 +1,5 @@
 const express = require('express');
-require('dotenv').config();
+const dotenv = require('dotenv').config();
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require('cors'); // Import CORS
@@ -8,14 +8,14 @@ const app = express();
 const port = 3000;
 
 // Enable CORS for all origins
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3004', // Replace with your React frontend's URL
+  credentials: true, // Allow cookies to be sent
+}));
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log('User DB connected'))
   .catch((err) => console.log('Database not connected', err));
 
@@ -47,7 +47,27 @@ app.get('/users', async (req, res) => {
   }
 });
 
+// Fetch Profile Route
+app.get('/profile', async (req, res) => {
+  try {
+    const { userId } = req.cookies; // Assume userId is stored in cookies
+    if (!userId) {
+      return res.status(401).send('Unauthorized: No user logged in');
+    }
+
+    const user = await User.findById(userId, '-password'); // Exclude password field
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error('Error fetching profile:', err);
+    res.status(500).send('Error fetching profile');
+  }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`User Service running on port ${port}`);
-});
+}); 

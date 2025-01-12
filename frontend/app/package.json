@@ -10,13 +10,13 @@
   },
   "homepage": "/app",
   "scripts": {
-    "start": "react-scripts start --public-url ./app/public",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "dev": "react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://api-gateway:3003",
+  "proxy": "http://localhost:3003",
   "eslintConfig": {
     "extends": [
       "react-app",
