@@ -1,31 +1,38 @@
 const express = require('express');
 require('dotenv').config();
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const cors = require('cors'); // Import CORS
+
 const app = express();
 const port = 3000;
-const {mongoose} = require('mongoose')
-const cookieParser = require('cookie-parser')
 
-// database connection
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log('User DB connected'))
-.catch((err) => console.log('Database not connected', err))
+// Enable CORS for all origins
+app.use(cors());
 
-// middleware
-app.use(express.json())
-app.use(cookieParser())
-app.use(express.urlencoded({extended: false}))
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('User DB connected'))
+  .catch((err) => console.log('Database not connected', err));
 
-app.use('/', require('./routes/authRoutes'))
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
 
+// Routes
+app.use('/', require('./routes/authRoutes'));
+
+// Example route
 app.get('/users', (req, res) => {
   res.json(users);
-});  
+});
 
+// Start the server
 app.listen(port, () => {
   console.log(`User Service running on port ${port}`);
 });
-
-const users = [
-  { id: 1, name: 'Ryan Stuart', email: 'ryanstuart911@gmail.com' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
-];  
