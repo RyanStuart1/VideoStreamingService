@@ -8,9 +8,11 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1"
   },
+  "homepage": "/app",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start --public-url ./app/public",
     "build": "react-scripts build",
+    "dev": "react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
