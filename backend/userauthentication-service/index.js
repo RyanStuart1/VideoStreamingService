@@ -8,10 +8,7 @@ const app = express();
 const port = 3000;
 
 // Enable CORS for all origins
-app.use(cors({
-  origin: 'http://localhost:3004', // Replace with your React frontend's URL
-  credentials: true, // Allow cookies to be sent
-}));
+app.use(cors());
 
 // Connect to MongoDB
 mongoose

@@ -12,7 +12,7 @@ import { UserContextProvider } from './context/userContext';
 import VideoPlayerPage from './pages/VideoPlayerPage';
 import VideoListPage from './pages/VideoListPage';
 
-axios.defaults.baseURL = 'http://localhost:3003';
+axios.defaults.baseURL = 'http://api-gateway:3003';
 axios.defaults.withCredentials = true
 
 function App() {
