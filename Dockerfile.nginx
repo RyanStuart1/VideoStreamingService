@@ -10,5 +10,5 @@ COPY ./frontend/app/build /usr/share/nginx/html
 # Expose port 80 for HTTP traffic
 EXPOSE 80
 
-# Start NGINX in the foreground
+# Start NGINX in the foreground #
 CMD ["nginx", "-g", "daemon off;"]
