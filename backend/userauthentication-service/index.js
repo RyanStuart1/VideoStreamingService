@@ -19,6 +19,15 @@ mongoose
   .then(() => console.log('User DB connected'))
   .catch((err) => console.log('Database not connected', err));
 
+// Define User Schema and Model
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true }, // Assuming the password is stored
+});
+
+const User = mongoose.model('User', userSchema, 'UserData'); // 'UserData' is the collection name
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
@@ -27,9 +36,15 @@ app.use(express.urlencoded({ extended: false }));
 // Routes
 app.use('/', require('./routes/authRoutes'));
 
-// Example route
-app.get('/users', (req, res) => {
-  res.json(users);
+// Fetch All Users Route
+app.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({}, '-password'); // Exclude the password field
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).send('Error fetching users');
+  }
 });
 
 // Start the server
