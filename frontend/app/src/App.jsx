@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import { Toaster } from 'react-hot-toast';
-import { UserContextProvider } from '../context/userContext';
+import { UserContextProvider } from './context/userContext';
 
 axios.defaults.baseURL = 'http://98.85.96.246:3000'
 axios.defaults.withCredentials = true
