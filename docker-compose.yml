@@ -63,23 +63,19 @@ services:
   frontend:
     build:
       context: ./frontend
-    ports:
-      - "80:3000"  # Exposing the frontend publicly on port 80
     depends_on:
       - api-gateway
     environment:
-      - REACT_APP_API_URL=http://api-gateway:3003/api
+      - REACT_APP_API_URL=http://98.85.96.246:3000/api
     networks:
       - app-network
 
   nginx:
-    image: nginx:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile-nginx  # Reference your NGINX Dockerfile
     ports:
-      - "80:80"      # NGINX serving frontend and proxying API Gateway on HTTP
-      - "443:443"    # NGINX handling HTTPS
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./certs:/etc/letsencrypt   # Mount SSL certificates
+      - "80:80"  # NGINX serving HTTP traffic on port 80
     depends_on:
       - frontend
       - api-gateway
