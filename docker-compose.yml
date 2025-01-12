@@ -47,16 +47,3 @@ services:
       - api-gateway
     environment:
       - REACT_APP_API_URL=http://98.85.96.246:8083/api
-
-  reverse-proxy:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    ports:
-      - "8083:80"  # HTTP traffic for HLS and RTMP
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf  # Use NGINX for HLS/RTMP streaming only
-    depends_on:
-      - videostreaming-service
-    environment:
-      - NGINX_PORT=80
