@@ -17,21 +17,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug npm install
-        run: |
-          echo "Listing contents of working directory"
-          ls -la ./backend/userauthentication-service
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-
-      - name: Configure npm registry
-        run: npm config set registry https://registry.npmjs.org/
-
-      - name: Clean npm cache
-        run: npm cache clean --force
 
       - name: Install dependencies with retry
         run: |
@@ -51,7 +40,7 @@ jobs:
           docker tag userauthentication-service ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/userauthentication-service:latest
 
-  # video streaming Service       
+  # Video Streaming Service       
   videostreaming-service:
     name: 🎥 Video Streaming Service - Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -59,21 +48,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug npm install
-        run: |
-          echo "Listing contents of working directory"
-          ls -la ./backend/videostreaming-service
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-
-      - name: Configure npm registry
-        run: npm config set registry https://registry.npmjs.org/
-
-      - name: Clean npm cache
-        run: npm cache clean --force
 
       - name: Install dependencies with retry
         run: |
@@ -149,6 +127,7 @@ jobs:
           docker tag watchlist-service ${{ secrets.DOCKER_USERNAME }}/watchlist-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/watchlist-service:latest
 
+  # Frontend
   frontend:
     name: 💻 Frontend - Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -160,12 +139,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-
-      - name: Configure npm registry
-        run: npm config set registry https://registry.npmjs.org/
-
-      - name: Increase npm timeout
-        run: npm config set fetch-retries 5
 
       - name: Install dependencies
         run: |
@@ -185,10 +158,11 @@ jobs:
           docker tag frontend ${{ secrets.DOCKER_USERNAME }}/frontend:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
+  # Reverse Proxy
   reverse-proxy:
     name: 🌐 NGINX Reverse Proxy - Build and Push Docker Image
     runs-on: ubuntu-latest
-    needs: frontend # Ensure the frontend build completes first
+    needs: frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -211,11 +185,11 @@ jobs:
           docker tag reverse-proxy ${{ secrets.DOCKER_USERNAME }}/reverse-proxy:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/reverse-proxy:latest
 
-  # Deployment to EC2
+  # Deploy to EC2
   deploy-to-ec2:
     name: 🚀 Deploy to EC2
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - userauthentication-service
       - videostreaming-service
       - api-gateway
@@ -223,21 +197,17 @@ jobs:
       - frontend
       - reverse-proxy
     steps:
-      # Step 1: Set up SSH agent
       - name: Set up SSH Agent
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      # Step 2: Deploy to EC2
       - name: Deploy to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@<your-ec2-ip> << 'EOF'
-            cd /path/to/your/docker-compose-directory
-
-            # Pull the latest Docker images
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST << 'EOF'
+            cd /path/to/docker-compose-directory
             docker-compose pull
-
-            # Restart the services
             docker-compose up -d
           EOF
