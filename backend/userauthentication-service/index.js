@@ -12,7 +12,7 @@ app.use(cors());
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect("mongodb://50.16.175.182:27017/UserAuthDB")
   .then(() => console.log('User DB connected'))
   .catch((err) => console.log('Database not connected', err));
 

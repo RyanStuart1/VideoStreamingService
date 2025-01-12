@@ -9,13 +9,6 @@ const app = express();
 app.use(cors());  // Enable CORS
 app.use(express.json());
 
-// Rate limiting to prevent abuse
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,  // 15 minutes
-  max: 100,  // Limit each IP to 100 requests per window
-});
-app.use('/api/', limiter);
-
 // Service URLs from environment variables (fallback to localhost)
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://98.85.96.246:3000';
 const VIDEO_SERVICE_URL = process.env.VIDEO_SERVICE_URL || 'http://98.85.96.246:3001';
