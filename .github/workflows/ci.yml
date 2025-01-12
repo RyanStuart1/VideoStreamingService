@@ -207,7 +207,7 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST << 'EOF'
-            cd /path/to/docker-compose-directory
+            cd /home/ec2-user/my-docker-app
             docker-compose pull
             docker-compose up -d
           EOF
