@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import { Toaster } from 'react-hot-toast';
 import { UserContextProvider } from './context/userContext';
 import VideoPlayerPage from './pages/VideoPlayerPage';
+import VideoListPage from './pages/VideoListPage';
 
 axios.defaults.baseURL = 'http://localhost:3003';
 axios.defaults.withCredentials = true
