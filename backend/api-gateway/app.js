@@ -8,9 +8,9 @@ app.use(cors());  // Enable CORS
 app.use(express.json());
 
 // Service URLs from environment variables (fallback to localhost)
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://98.85.96.246:3000';
-const VIDEO_SERVICE_URL = process.env.VIDEO_SERVICE_URL || 'http://98.85.96.246:3001';
-const WATCHLIST_SERVICE_URL = process.env.WATCHLIST_SERVICE_URL || 'http://98.85.96.246:3002';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3000';
+const VIDEO_SERVICE_URL = process.env.VIDEO_SERVICE_URL || 'http://localhost:3001';
+const WATCHLIST_SERVICE_URL = process.env.WATCHLIST_SERVICE_URL || 'http://localhost:3002';
 
 // Routes
 app.get('/api/users', async (req, res) => {
