@@ -19,7 +19,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://api-gateway:3003",
+  "proxy": "http://98.85.96.246:3003",
   "eslintConfig": {
     "extends": [
       "react-app",

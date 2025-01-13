@@ -14,7 +14,7 @@ export default function Login() {
     e.preventDefault()
     const {email, password} = data
     try {
-      const {data} = await axios.post('http://localhost:3003/login', {
+      const {data} = await axios.post('http://98.85.96.246:3003/login', {
         email,
         password
       });
