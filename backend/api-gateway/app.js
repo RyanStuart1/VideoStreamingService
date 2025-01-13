@@ -1,10 +1,13 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const http = require('http'); // Required to create an HTTP server
+const WebSocket = require('ws'); // WebSocket library
+
 const app = express();
 
 // Middleware
-app.use(cors());  // Enable CORS
+app.use(cors()); // Enable CORS
 app.use(express.json());
 
 // Service URLs from environment variables (fallback to localhost)
@@ -65,8 +68,32 @@ app.get('/api/watchlist', async (req, res) => {
   }
 });
 
-// Start server
-const PORT = process.env.PORT || 3003;
-app.listen(PORT, () => {
-  console.log(`API Gateway running on port ${PORT}`);
+// Create HTTP server and WebSocket server
+const server = http.createServer(app);
+
+// WebSocket server listening on the same server
+const wss = new WebSocket.Server({ server, path: '/ws' });
+
+wss.on('connection', (ws) => {
+  console.log('New WebSocket connection established');
+
+  // Handle incoming messages
+  ws.on('message', (message) => {
+    console.log(`Received message: ${message}`);
+    ws.send(`Echo: ${message}`); // Echo the message back to the client
+  });
+
+  // Handle WebSocket disconnection
+  ws.on('close', () => {
+    console.log('WebSocket connection closed');
+  });
+
+  // Send a welcome message when the client connects
+  ws.send('Welcome to the WebSocket server!');
+});
+
+// Start server explicitly on port 3000
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`HTTP and WebSocket server running on http://98.85.96.246:${PORT}`);
 });
