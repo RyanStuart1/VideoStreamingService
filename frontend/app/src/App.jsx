@@ -16,7 +16,7 @@ import VideoListPage from './pages/VideoListPage';
 //    Instead, read from environment variables:
 
 // Use the environment variable that Create React App provides at build time:
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3003';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3003/api';
 
 // 2) Set Axios defaults (with baseURL if you prefer):
 axios.defaults.baseURL = API_BASE_URL;
