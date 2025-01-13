@@ -65,11 +65,6 @@ app.get('/api/watchlist', async (req, res) => {
   }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'API Gateway is running' });
-});
-
 // Start server
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
