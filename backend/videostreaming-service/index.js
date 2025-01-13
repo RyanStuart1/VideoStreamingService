@@ -114,25 +114,25 @@ app.get('/api/stream/:id', async (req, res) => {
     }
 
     const range = req.headers.range;
-    if (!range) {
-      return res.status(400).send('Requires Range header');
+    if (!range || !/^bytes=\d*-\d*$/.test(range)) {
+      return res.status(400).send('Invalid or missing Range header');
     }
 
     const videoUrl = video.url; // Assuming the public URL is stored in MongoDB
     const headResponse = await fetch(videoUrl, { method: 'HEAD' });
 
     if (!headResponse.ok) {
+      console.error('Error fetching video metadata from S3');
       return res.status(500).json({ error: 'Failed to fetch video metadata from S3' });
     }
 
-    const videoSize = headResponse.headers.get('content-length');
+    const videoSize = parseInt(headResponse.headers.get('content-length'), 10);
 
     // Parse Range
     const CHUNK_SIZE = 10 ** 6; // 1MB
     const start = Number(range.replace(/\D/g, ''));
-    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+    const end = Math.min(start + CHUNK_SIZE - 1, videoSize - 1);
 
-    // Set response headers
     const contentLength = end - start + 1;
     const headers = {
       'Content-Range': `bytes ${start}-${end}/${videoSize}`,
@@ -143,7 +143,6 @@ app.get('/api/stream/:id', async (req, res) => {
 
     res.writeHead(206, headers);
 
-    // Stream video chunk
     const videoStream = await fetch(videoUrl, {
       headers: {
         Range: `bytes=${start}-${end}`,
@@ -151,6 +150,7 @@ app.get('/api/stream/:id', async (req, res) => {
     });
 
     if (!videoStream.ok) {
+      console.error('Error streaming video chunk');
       return res.status(500).json({ error: 'Failed to stream video chunk from S3' });
     }
 
