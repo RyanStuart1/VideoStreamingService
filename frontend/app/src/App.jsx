@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Routes, Route} from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -12,8 +12,15 @@ import { UserContextProvider } from './context/userContext';
 import VideoPlayerPage from './pages/VideoPlayerPage';
 import VideoListPage from './pages/VideoListPage';
 
-axios.defaults.baseURL = 'http://api-gateway:3003';
-axios.defaults.withCredentials = true
+// 1) Remove any inline REACT_APP_API_URL= '...' lines. 
+//    Instead, read from environment variables:
+
+// Use the environment variable that Create React App provides at build time:
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3003/api';
+
+// 2) Set Axios defaults (with baseURL if you prefer):
+axios.defaults.baseURL = API_BASE_URL;
+axios.defaults.withCredentials = true;
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -29,13 +36,16 @@ function App() {
       setIsFetching(true);
       try {
         console.log('Fetching users, videos, and watchlist data...');
-        const usersResponse = await axios.get('/api/users'); // Relative path
+
+        // Because we set axios.defaults.baseURL above,
+        // we can just do '/users' instead of the full URL:
+        const usersResponse = await axios.get('/users');
         setUsers(usersResponse.data);
 
-        const videosResponse = await axios.get('/api/videos'); // Relative path
+        const videosResponse = await axios.get('/videos');
         setVideos(videosResponse.data);
 
-        const watchlistResponse = await axios.get('/api/watchlist'); // Relative path
+        const watchlistResponse = await axios.get('/watchlist');
         setWatchlist(watchlistResponse.data);
 
         console.log('Data fetched successfully');
@@ -50,25 +60,24 @@ function App() {
 
   // Function to start streaming a video
   const startStream = async (videoId) => {
-    const trimmedVideoId = videoId.trim(); // Ensure no leading/trailing spaces
-    console.log('Requesting video with ID:', trimmedVideoId); // Debugging log
+    const trimmedVideoId = videoId.trim();
+    console.log('Requesting video with ID:', trimmedVideoId);
 
     setLoading(true);
     try {
-      const response = await axios.get(`/api/videos/${trimmedVideoId}`); // Relative path
+      // We'll call `/videos/${trimmedVideoId}` instead of `/api/videos/${trimmedVideoId}`
+      // because our base URL is already /api if your REACT_APP_API_URL is set to /api at the end.
+      const response = await axios.get(`/videos/${trimmedVideoId}`);
       const videoData = response.data;
-
-      console.log('Video metadata received:', videoData); // Debugging log
+      console.log('Video metadata received:', videoData);
 
       setSelectedVideo({
         id: videoData._id,
         title: videoData.title,
-        url: videoData.url, // Use the S3 URL returned by the API
+        url: videoData.url, 
       });
     } catch (err) {
       console.error('Failed to load video metadata:', err);
-
-      // Check if the error is a 404
       if (err.response && err.response.status === 404) {
         alert('Video not found. Please select another video.');
       } else {
@@ -85,18 +94,19 @@ function App() {
         <p>Loading data...</p>
       ) : (
         <>
-        <UserContextProvider>
-          <Navbar />
-          <Toaster position='bottom-right' toastOptions={{duration: 2000}} />
-          <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/register' element={<Register />} />
-            <Route path='/login' element={<Login />} />
-            <Route path='/dashboard' element={<Dashboard />} />
-            <Route path="/video/:id" element={<VideoPlayerPage />} />
-            <Route path="/videos" element={<VideoListPage videos={videos} />} />
-          </Routes>
-        </UserContextProvider>
+          <UserContextProvider>
+            <Navbar />
+            <Toaster position='bottom-right' toastOptions={{ duration: 2000 }} />
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/register' element={<Register />} />
+              <Route path='/login' element={<Login />} />
+              <Route path='/dashboard' element={<Dashboard />} />
+              <Route path="/video/:id" element={<VideoPlayerPage />} />
+              <Route path="/videos" element={<VideoListPage videos={videos} />} />
+            </Routes>
+          </UserContextProvider>
+
           {/* Users Section */}
           <h1>Users</h1>
           <ul className="users-list">
@@ -138,7 +148,7 @@ function App() {
                   color: 'white',
                   backgroundColor: 'black',
                 }}
-                onClick={() => startStream(video._id)} // Fetch the stream URL and set the selected video
+                onClick={() => startStream(video._id)}
               >
                 {video.title}
               </div>
