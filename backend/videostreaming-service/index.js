@@ -17,6 +17,16 @@ const collectionName = process.env.MONGO_COLLECTION_NAME;
 const client = new MongoClient(mongoURI);
 let collection;
 
+// Hardcoded videos array
+const hardcodedVideos = [
+  {
+    _id: "1",
+    title: "Big Buck Bunny",
+    thumbnail: "https://video-streaming-service-rs.s3.us-east-1.amazonaws.com/BuckBunny.png",
+    url: "https://video-streaming-service-rs.s3.us-east-1.amazonaws.com/big_buck_bunny_1080p_h264.mp4",
+  },
+];
+
 // Function to connect to MongoDB with retries
 async function connectToMongoDB() {
   const maxRetries = 5;
@@ -50,7 +60,13 @@ app.use(cors());
 // Route to fetch all video metadata
 app.get('/videos', async (req, res) => {
   try {
-    const videos = await collection.find({}).toArray();
+    let videos = hardcodedVideos; // Start with hardcoded videos
+
+    if (collection) {
+      const dbVideos = await collection.find({}).toArray();
+      videos = [...videos, ...dbVideos]; // Merge hardcoded and database videos
+    }
+
     if (videos.length === 0) {
       return res.status(404).json({ error: 'No video metadata found' });
     }
@@ -70,14 +86,25 @@ app.get('/videos/:id', async (req, res) => {
       return res.status(400).json({ error: 'Video ID is required' });
     }
 
-    const query = ObjectId.isValid(videoId) ? { _id: ObjectId(videoId) } : { _id: videoId };
-    const video = await collection.findOne(query);
-
-    if (!video) {
-      return res.status(404).json({ error: 'Video metadata not found' });
+    // Check hardcoded videos first
+    const hardcodedVideo = hardcodedVideos.find((video) => video._id === videoId);
+    if (hardcodedVideo) {
+      return res.json(hardcodedVideo);
     }
 
-    res.json(video);
+    // If not found in hardcoded, check MongoDB
+    if (collection) {
+      const query = ObjectId.isValid(videoId) ? { _id: ObjectId(videoId) } : { _id: videoId };
+      const video = await collection.findOne(query);
+
+      if (!video) {
+        return res.status(404).json({ error: 'Video metadata not found' });
+      }
+
+      return res.json(video);
+    }
+
+    res.status(404).json({ error: 'Video metadata not found' });
   } catch (error) {
     console.error('Error fetching video metadata:', error);
     res.status(500).json({ error: 'Failed to fetch video metadata' });
@@ -93,8 +120,9 @@ app.get('/stream/:id', async (req, res) => {
       return res.status(400).json({ error: 'Video ID is required' });
     }
 
-    // Fetch video metadata from MongoDB
-    const video = await collection.findOne({ _id: ObjectId(videoId) });
+    // Check hardcoded videos first
+    const hardcodedVideo = hardcodedVideos.find((video) => video._id === videoId);
+    const video = hardcodedVideo || (collection && await collection.findOne({ _id: ObjectId(videoId) }));
 
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
@@ -105,7 +133,7 @@ app.get('/stream/:id', async (req, res) => {
       return res.status(400).send('Invalid or missing Range header');
     }
 
-    const videoUrl = video.url; // Assuming the public URL is stored in MongoDB
+    const videoUrl = video.url; // Assuming the public URL is stored in MongoDB or hardcoded
     const headResponse = await fetch(videoUrl, { method: 'HEAD' });
 
     if (!headResponse.ok) {
