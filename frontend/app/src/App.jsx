@@ -83,7 +83,7 @@ function App() {
           </div>
 
           {/* Users Section */}
-          <h1>Users</h1>
+          <h2>Username</h2>
           <ul className="users-list">
             {users.map((user) => (
               <li key={user.id}>
