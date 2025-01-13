@@ -127,7 +127,7 @@ function App() {
                 Your browser does not support the video tag.
               </video>
             </div>
-          ) : (
+          ) (
             <p>Select a video to play</p>
           )}
 
