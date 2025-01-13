@@ -119,10 +119,10 @@ function App() {
 
           {/* Video Streaming Section */}
           <h1>Video Streaming Application</h1>
-          {selectedVideo ? (
+          {selectedVideo && (
             <div className="video-player" style={{ margin: '20px auto' }}>
               <h2>{selectedVideo.title}</h2>
-              <video controls width="800" height="450">
+              <video key={selectedVideo.id}controls width="800" height="450">
                 <source src={selectedVideo.url} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
@@ -148,9 +148,9 @@ function App() {
                   color: 'white',
                   backgroundColor: 'black',
                 }}
-                onClick={() => startStream(video._id)}
-              >
-                {video.title}
+                onClick={() => startStream(video._id)}>
+                  <img src ={video.thumbnail} alt={video.title} />
+                <p>{video.title}</p>
               </div>
             ))}
           </div>

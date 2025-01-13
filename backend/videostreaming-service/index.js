@@ -43,22 +43,8 @@ async function connectToMongoDB() {
 
 connectToMongoDB();
 
-// Middleware to log requests
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
 // Middleware to enable CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204); // Respond to preflight requests
-  }
-  next();
-});
+app.use(cors());
 
 // Route to fetch all video metadata
 app.get('/videos', async (req, res) => {
@@ -75,7 +61,7 @@ app.get('/videos', async (req, res) => {
 });
 
 // Route to fetch metadata for a specific video by ID
-app.get('/api/videos/:id', async (req, res) => {
+app.get('/videos/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
 
@@ -98,7 +84,7 @@ app.get('/api/videos/:id', async (req, res) => {
 });
 
 // Route to handle video streaming
-app.get('/api/stream/:id', async (req, res) => {
+app.get('/stream/:id', async (req, res) => {
   try {
     const videoId = req.params.id;
 
