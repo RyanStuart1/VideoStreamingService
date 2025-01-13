@@ -92,7 +92,17 @@ const VideoPlayerPage = () => {
             </div>
           ))
         ) : (
-          <p>No videos available</p>
+          <div>
+            <p>No videos available</p>
+            <a
+              href="https://video-streaming-service-rs.s3.us-east-1.amazonaws.com/big_buck_bunny_1080p_h264.mp4"
+              style={{ color: 'red', textDecoration: 'underline' }}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Click here to view a sample video
+            </a>
+          </div>
         )}
       </div>
 
