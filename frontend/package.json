@@ -13,6 +13,7 @@
     "web-vitals": "^4.2.4",
     "webpack-dev-server": "^5.2.0"
   },
+  "proxy": "http://api-gateway:3003",
   "scripts": {
     "start": "cd app && react-scripts start",
     "build": "cd app && react-scripts build",
