@@ -12,13 +12,10 @@ import { UserContextProvider } from './context/userContext';
 import VideoPlayerPage from './pages/VideoPlayerPage';
 import VideoListPage from './pages/VideoListPage';
 
-// 1) Remove any inline REACT_APP_API_URL= '...' lines. 
-//    Instead, read from environment variables:
-
 // Use the environment variable that Create React App provides at build time:
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://98.85.96.246:3003/api';
 
-// 2) Set Axios defaults (with baseURL if you prefer):
+// Set Axios defaults:
 axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.withCredentials = true;
 
@@ -37,20 +34,20 @@ function App() {
       try {
         console.log('Fetching users, videos, and watchlist data...');
 
-        // Because we set axios.defaults.baseURL above,
-        // we can just do '/users' instead of the full URL:
-        const usersResponse = await axios.get('/users');
+        const [usersResponse, videosResponse, watchlistResponse] = await Promise.all([
+          axios.get('/users'),
+          axios.get('/videos'),
+          axios.get('/watchlist'),
+        ]);
+
         setUsers(usersResponse.data);
-
-        const videosResponse = await axios.get('/videos');
         setVideos(videosResponse.data);
-
-        const watchlistResponse = await axios.get('/watchlist');
         setWatchlist(watchlistResponse.data);
 
         console.log('Data fetched successfully');
       } catch (err) {
         console.error('Failed to fetch data:', err);
+        alert('Failed to load data. Please try again later.');
       } finally {
         setIsFetching(false);
       }
@@ -65,24 +62,23 @@ function App() {
 
     setLoading(true);
     try {
-      // We'll call `/videos/${trimmedVideoId}` instead of `/api/videos/${trimmedVideoId}`
-      // because our base URL is already /api if your REACT_APP_API_URL is set to /api at the end.
       const response = await axios.get(`/videos/${trimmedVideoId}`);
       const videoData = response.data;
+
       console.log('Video metadata received:', videoData);
 
       setSelectedVideo({
         id: videoData._id,
         title: videoData.title,
-        url: videoData.url, 
+        url: `/stream/${videoData._id}`, // Updated to use /stream/:id endpoint
       });
     } catch (err) {
       console.error('Failed to load video metadata:', err);
-      if (err.response && err.response.status === 404) {
-        alert('Video not found. Please select another video.');
-      } else {
-        alert('Failed to load video. Please try again later.');
-      }
+      alert(
+        err.response?.status === 404
+          ? 'Video not found. Please select another video.'
+          : 'Failed to load video. Please try again later.'
+      );
     } finally {
       setLoading(false);
     }
@@ -96,12 +92,12 @@ function App() {
         <>
           <UserContextProvider>
             <Navbar />
-            <Toaster position='bottom-right' toastOptions={{ duration: 2000 }} />
+            <Toaster position="bottom-right" toastOptions={{ duration: 2000 }} />
             <Routes>
-              <Route path='/' element={<Home />} />
-              <Route path='/register' element={<Register />} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/dashboard' element={<Dashboard />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/video/:id" element={<VideoPlayerPage />} />
               <Route path="/videos" element={<VideoListPage videos={videos} />} />
             </Routes>
@@ -109,50 +105,63 @@ function App() {
 
           {/* Users Section */}
           <h1>Users</h1>
-          <ul className="users-list">
-            {users.map((user) => (
-              <li key={user.id}>
-                {user.name} ({user.email})
-              </li>
-            ))}
-          </ul>
+          {users.length === 0 ? (
+            <p>No users found.</p>
+          ) : (
+            <ul className="users-list">
+              {users.map((user) => (
+                <li key={user.id}>
+                  {user.name} ({user.email})
+                </li>
+              ))}
+            </ul>
+          )}
 
           {/* Video Streaming Section */}
           <h1>Video Streaming Application</h1>
-          {selectedVideo && (
+          {selectedVideo ? (
             <div className="video-player" style={{ margin: '20px auto' }}>
               <h2>{selectedVideo.title}</h2>
-              <video key={selectedVideo.id}controls width="800" height="450">
+              <video key={selectedVideo.id} controls width="800" height="450">
                 <source src={selectedVideo.url} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
-          ) (
+          ) : (
             <p>Select a video to play</p>
           )}
 
           {/* Video List */}
           <div className="video-list" style={{ margin: '20px auto', padding: '10px' }}>
             <h3>Available Videos</h3>
-            {videos.map((video) => (
-              <div
-                key={video._id}
-                className="video-item"
-                style={{
-                  cursor: 'pointer',
-                  margin: '10px',
-                  padding: '10px',
-                  border: '1px solid red',
-                  borderRadius: '5px',
-                  display: 'inline-block',
-                  color: 'white',
-                  backgroundColor: 'black',
-                }}
-                onClick={() => startStream(video._id)}>
-                  <img src ={video.thumbnail} alt={video.title} />
-                <p>{video.title}</p>
-              </div>
-            ))}
+            {videos.length === 0 ? (
+              <p>No videos available.</p>
+            ) : (
+              videos.map((video) => (
+                <div
+                  key={video._id}
+                  className="video-item"
+                  style={{
+                    cursor: 'pointer',
+                    margin: '10px',
+                    padding: '10px',
+                    border: '1px solid red',
+                    borderRadius: '5px',
+                    display: 'inline-block',
+                    color: 'white',
+                    backgroundColor: 'black',
+                  }}
+                  onClick={() => startStream(video._id)}
+                >
+                  <img
+                    src={video.thumbnail || '/placeholder-thumbnail.jpg'}
+                    alt={video.title}
+                    style={{ width: '100%', height: 'auto' }}
+                  />
+                  <p>{video.title}</p>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Loading Indicator */}
@@ -160,13 +169,17 @@ function App() {
 
           {/* Watchlist Section */}
           <h1>Watchlist</h1>
-          <ul className="watchlist">
-            {watchlist.map((item) => (
-              <li key={item.id}>
-                {item.title} - Status: {item.status}
-              </li>
-            ))}
-          </ul>
+          {watchlist.length === 0 ? (
+            <p>Your watchlist is empty.</p>
+          ) : (
+            <ul className="watchlist">
+              {watchlist.map((item) => (
+                <li key={item.id}>
+                  {item.title} - Status: {item.status}
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       )}
     </div>
