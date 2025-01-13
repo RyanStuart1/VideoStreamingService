@@ -4,13 +4,7 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(
-  cors({
-    origin: 'http://98.85.96.246:3004', // Frontend origin
-    credentials: true, // Allow cookies to be sent
-  })
-);  // Enable CORS
-axios.defaults.withCredentials = true;
+app.use(cors());  // Enable CORS
 app.use(express.json());
 
 // Service URLs from environment variables (fallback to localhost)
@@ -34,13 +28,7 @@ app.get('/api/users', async (req, res) => {
 
 app.get('/api/profile', async (req, res) => {
   try {
-    // Forward cookies from the client
-    const response = await axios.get(`${USER_SERVICE_URL}/profile`, {
-      headers: {
-        Cookie: req.headers.cookie, // Forward client cookies
-      },
-    });
-
+    const response = await axios.get(`${USER_SERVICE_URL}/profile`);
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching profile:', error.message);
@@ -50,7 +38,6 @@ app.get('/api/profile', async (req, res) => {
     });
   }
 });
-
 
 app.get('/api/videos', async (req, res) => {
   try {
