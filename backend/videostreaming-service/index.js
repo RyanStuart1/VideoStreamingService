@@ -1,6 +1,7 @@
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
+const cors = require('cors');
 
 // Using dynamic import for node-fetch (compatible with node-fetch v3+)
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
