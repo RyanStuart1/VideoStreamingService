@@ -8,7 +8,12 @@ const app = express();
 const port = 3000;
 
 // Enable CORS for all origins
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://98.85.96.246:3003', // API Gateway origin
+    credentials: true, // Allow cookies
+  })
+);
 
 // Connect to MongoDB
 mongoose
