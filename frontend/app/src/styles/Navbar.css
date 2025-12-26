@@ -1,0 +1,70 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 28px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 15, 20, 0.95),
+    rgba(10, 10, 14, 0.95)
+  );
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+/* Logo */
+.navbar-logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+/* Right side */
+.navbar-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons */
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+/* Outline button */
+.nav-btn.ghost {
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.nav-btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Primary (accent) button */
+.nav-btn.primary {
+  background: #e50914;
+  color: white;
+}
+
+.nav-btn.primary:hover {
+  background: #ff1f2b;
+  transform: translateY(-1px);
+}
+
+/* Active route highlight */
+.nav-btn.active,
+.navbar-logo.active {
+  box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.4);
+}

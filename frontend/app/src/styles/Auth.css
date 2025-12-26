@@ -1,0 +1,115 @@
+:root {
+  --bg: #0b0b0f;
+  --panel: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.65);
+  --accent: #e50914;
+}
+
+.authPage {
+  min-height: calc(100vh - 64px);
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  background: radial-gradient(
+      800px 400px at 20% 0%,
+      rgba(229, 9, 20, 0.22),
+      transparent 60%
+    ),
+    radial-gradient(
+      600px 400px at 80% 10%,
+      rgba(255, 255, 255, 0.08),
+      transparent 60%
+    );
+}
+
+.authCard {
+  width: min(420px, 92vw);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.authHeader h1 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 1.5rem;
+}
+
+.authHeader p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.authForm {
+  display: grid;
+  gap: 10px;
+}
+
+.authLabel {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+.authInput {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  outline: none;
+}
+
+.authInput:focus {
+  border-color: rgba(229, 9, 20, 0.55);
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.18);
+}
+
+.authButton {
+  margin-top: 10px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.authButton:hover {
+  background: #ff1f2b;
+  transform: translateY(-1px);
+}
+
+.authButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.authFooter {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.authLink {
+  color: white;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.authLink:hover {
+  border-bottom-color: rgba(229, 9, 20, 0.8);
+}

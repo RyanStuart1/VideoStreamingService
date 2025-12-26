@@ -1,60 +1,28 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { useContext } from "react";
+import { UserContext } from "../context/userContext";
 
 export default function Navbar() {
+  const { user } = useContext(UserContext);
+
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "10px 20px",
-        backgroundColor: "black",
-        borderBottom: "1px solid red",
-      }}
-    >
-      {/* Home button on the left */}
-      <div>
-        <Link
-          to="/"
-          style={{
-            color: "white",
-            textDecoration: "none",
-            padding: "5px 10px",
-            border: "1px solid red",
-            borderRadius: "5px",
-          }}
-        >
-          Home
-        </Link>
+    <nav className="navbar">
+      {/* Left: Logo / Home */}
+      <div className="navbar-left">
+        <NavLink to={user ? "/dashboard" : "/login"} className="navbar-logo">
+          StreamBox
+        </NavLink>
       </div>
 
-      {/* Register and Login buttons on the right */}
-      <div>
-        <Link
-          to="/register"
-          style={{
-            color: "white",
-            textDecoration: "none",
-            padding: "5px 10px",
-            border: "1px solid red",
-            borderRadius: "5px",
-            marginRight: "10px",
-          }}
-        >
-          Register
-        </Link>
-        <Link
-          to="/login"
-          style={{
-            color: "white",
-            textDecoration: "none",
-            padding: "5px 10px",
-            border: "1px solid red",
-            borderRadius: "5px",
-          }}
-        >
-          Login
-        </Link>
+      {/* Right: Actions */}
+      <div className="navbar-right">
+        {user && (
+          <>
+            <NavLink to="/account" className="nav-btn ghost">
+              My Account
+            </NavLink>
+          </>
+        )}
       </div>
     </nav>
   );

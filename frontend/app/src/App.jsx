@@ -1,110 +1,132 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './App.css';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import { Toaster } from 'react-hot-toast';
-import { UserContextProvider } from './context/userContext';
-import VideoPlayerPage from './pages/VideoPlayerPage';
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import axios from "axios";
+import "./App.css";
 
-// Use the environment variable that Create React App provides at build time:
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://98.85.96.246:3003/api';
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import VideoPlayerPage from "./pages/VideoPlayerPage";
+import Account from "./pages/Account";
 
-// Set Axios defaults
+import { Toaster } from "react-hot-toast";
+import { UserContextProvider } from "./context/userContext";
+import { useUser } from "./context/userContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Better default for local dev
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3003/api";
 axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.withCredentials = true;
 
-function App() {
-  const [users, setUsers] = useState([]);
-  const [watchlist, setWatchlist] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
-  const navigate = useNavigate(); // For programmatic navigation
+// Redirect /video to the first available video
+function VideoIndexRedirect({ videos, videosLoading }) {
+  if (videosLoading) return <div className="card">Loading videos…</div>;
+  if (!videos || videos.length === 0) return <div className="card">No videos available.</div>;
+  return <Navigate to={`/video/${videos[0]._id}`} replace />;
+}
 
-  // Fetch data from APIs
+function AppRoutes() {
+  const { user, loading } = useUser();
+  const [videos, setVideos] = useState([]);
+  const [videosLoading, setVideosLoading] = useState(false);
+
   useEffect(() => {
-    const fetchData = async () => {
-      setIsFetching(true);
+    if (!user) return;
+
+    const run = async () => {
+      setVideosLoading(true);
       try {
-        console.log('Fetching users and watchlist data...');
-        const usersResponse = await axios.get('/users');
-        setUsers(usersResponse.data);
-
-        const watchlistResponse = await axios.get('/watchlist');
-        setWatchlist(watchlistResponse.data);
-
-        console.log('Data fetched successfully');
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
+        const res = await axios.get("/videos");
+        setVideos(res.data || []);
+      } catch (e) {
+        console.error("Failed to fetch videos:", e);
+        setVideos([]);
       } finally {
-        setIsFetching(false);
+        setVideosLoading(false);
       }
     };
-    fetchData();
-  }, []);
+
+    run();
+  }, [user]);
+
+  if (loading) return <div className="card">Checking session…</div>;
 
   return (
-    <div className="App" style={{ backgroundColor: 'black', color: 'red', textAlign: 'center' }}>
-      {isFetching ? (
-        <p>Loading data...</p>
-      ) : (
-        <>
-          <UserContextProvider>
-            <Navbar />
-            <Toaster position="bottom-right" toastOptions={{ duration: 2000 }} />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/videoplayer" element={<VideoPlayerPage />} />
-            </Routes>
-          </UserContextProvider>
+    <Routes>
+      {/* Root: send logged-in users to dashboard, everyone else to login */}
+      <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
 
-          {/* Navigation Section with a Button */}
-          <div>
-            <button
-              style={{
-                padding: '10px 20px',
-                margin: '20px',
-                borderRadius: '5px',
-                border: 'none',
-                backgroundColor: 'red',
-                color: 'white',
-                cursor: 'pointer',
-              }}
-              onClick={() => navigate('/videoplayer')} // Navigates to the video player page
-            >
-              Go to Video Player
-            </button>
-          </div>
+      {/* Public */}
+      <Route
+        path="/login"
+        element={user ? <Navigate to="/dashboard" replace /> : <Login />}
+      />
 
-          {/* Users Section */}
-          <h2>Username</h2>
-          <ul className="users-list">
-            {users.map((user) => (
-              <li key={user.id}>
-                {user.name} ({user.email})
-              </li>
-            ))}
-          </ul>
+      <Route
+        path="/register"
+        element={user ? <Navigate to="/dashboard" replace /> : <Register />}
+      />
+      {/* Optional public home */}
+      <Route path="/home" element={<Home />} />
 
-          {/* Watchlist Section */}
-          <h1>Watchlist</h1>
-          <ul className="watchlist">
-            {watchlist.map((item) => (
-              <li key={item.id}>
-                {item.title} - Status: {item.status}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
+      {/* Protected */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard videos={videos} videosLoading={videosLoading} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* /video -> auto-select first video */}
+      <Route
+        path="/video"
+        element={
+          <ProtectedRoute>
+            <VideoIndexRedirect videos={videos} videosLoading={videosLoading} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* /video/:id -> player */}
+      <Route
+        path="/video/:id"
+        element={
+          <ProtectedRoute>
+            <VideoPlayerPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/account"
+        element={
+          <ProtectedRoute>
+            <Account />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <div className="appShell">
+      <UserContextProvider>
+        <Navbar />
+        <Toaster position="bottom-right" toastOptions={{ duration: 2000 }} />
+        <div className="container">
+          <AppRoutes />
+        </div>
+      </UserContextProvider>
+    </div>
+  );
+}

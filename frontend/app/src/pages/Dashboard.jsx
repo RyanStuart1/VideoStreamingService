@@ -1,46 +1,92 @@
 import React, { useContext } from "react";
-import { UserContext } from "../context/userContext";
 import { Link } from "react-router-dom";
+import { UserContext } from "../context/userContext";
 
-export default function Dashboard({ videos }) {
+const FALLBACK_POSTER = "/placeholder.png";
+
+export default function Dashboard({ videos = [], videosLoading = false }) {
   const { user } = useContext(UserContext);
 
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      {!!user && <h1>Hi {user.name}!</h1>}
+  const featured = videos?.[0];
 
-      {/* Video List Section */}
-      <div className="video-list" style={{ margin: "20px auto", padding: "10px" }}>
-        <h3>Available Videos</h3>
-        {videos.length > 0 ? (
-          videos.map((video) => (
-            <div
-              key={video._id}
-              className="video-item"
-              style={{
-                cursor: "pointer",
-                margin: "10px",
-                padding: "10px",
-                border: "1px solid red",
-                borderRadius: "5px",
-                display: "inline-block",
-                color: "white",
-                backgroundColor: "black",
-              }}
-            >
-              <Link
-                to={`/video/${video._id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                {video.title}
-              </Link>
+  return (
+    <div className="nf">
+      <header className="nfTopBar">
+        <div className="nfBrand">StreamBox</div>
+        <div className="nfUser">
+          {user?.name ? <span>Hi, {user.name}</span> : null}
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section className="nfHero">
+        <div className="nfHeroBg" />
+        <div className="nfHeroInner">
+          <div className="nfHeroLeft">
+            <div className="nfHeroLabel">FEATURED</div>
+            <h1 className="nfHeroTitle">{featured?.title || "Pick something to watch"}</h1>
+            <p className="nfHeroDesc">
+              Jump back in, or find something new to watch.
+            </p>
+
+            <div className="nfHeroActions">
+              {featured ? (
+                <Link className="nfBtn nfBtnPrimary" to={`/video/${featured._id}`}>
+                  ▶ Play
+                </Link>
+              ) : (
+                <button className="nfBtn nfBtnPrimary" disabled>
+                  ▶ Play
+                </button>
+              )}
             </div>
-          ))
+          </div>
+
+          {featured ? (
+            <img
+              className="nfHeroPoster"
+              src={featured.thumbnail || FALLBACK_POSTER}
+              alt={featured.title}
+              onError={(e) => {
+                e.currentTarget.src = FALLBACK_POSTER;
+              }}
+            />
+          ) : null}
+        </div>
+      </section>
+
+      {/* ROW */}
+      <main className="nfMain">
+        <h2 className="nfRowTitle">Trending Now</h2>
+
+        {videosLoading ? (
+          <div className="nfCard">Loading videos…</div>
+        ) : videos.length === 0 ? (
+          <div className="nfCard">No videos available.</div>
         ) : (
-          <p>No videos available.</p>
+          <div className="nfRow">
+            {videos.map((v) => (
+              <Link key={v._id} to={`/video/${v._id}`} className="nfTile">
+                <div className="nfTileImgWrap">
+                  <img
+                    className="nfTileImg"
+                    src={v.thumbnail || FALLBACK_POSTER}
+                    alt={v.title}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = FALLBACK_POSTER;
+                    }}
+                  />
+                  <div className="nfTileOverlay">
+                    <div className="nfTileTitle">{v.title}</div>
+                    <div className="nfTilePlay">Play</div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
-}
+} 

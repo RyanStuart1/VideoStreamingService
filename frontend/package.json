@@ -8,12 +8,12 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.1",
     "react-router-dom": "^7.1.1",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "^0.0.0",
     "svgo": "^3.3.2",
     "web-vitals": "^4.2.4",
     "webpack-dev-server": "^5.2.0"
   },
-  "proxy": "http://api-gateway:3003",
+  "proxy": "http://localhost:3003",
   "scripts": {
     "start": "cd app && react-scripts start",
     "build": "cd app && react-scripts build",

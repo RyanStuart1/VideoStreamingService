@@ -1,25 +1,34 @@
-import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
-export const UserContext = createContext({});
+export const UserContext = createContext(null);
 
 export function UserContextProvider({ children }) {
-    const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        axios.get('/profile')
-            .then(({ data }) => {
-                setUser(data);
-            })
-            .catch((err) => {
-                console.error('Error fetching profile:', err);
-                // Optionally, set an error state or handle accordingly
-            });
-    }, []); // Ensure this runs only once
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await axios.get("/profile");
+        if (!res.data?.error) {
+          setUser(res.data);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return (
-        <UserContext.Provider value={{ user, setUser }}>
-            {children}
-        </UserContext.Provider>
-    );
+    loadProfile();
+  }, []);
+
+  return (
+    <UserContext.Provider value={{ user, setUser, loading }}>
+      {children}
+    </UserContext.Provider>
+  );
 }
+
+export const useUser = () => useContext(UserContext);

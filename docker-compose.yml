@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 networks:
   app-network:
@@ -9,7 +9,7 @@ volumes:
 
 services:
   mongodb:
-    image: mongo:latest
+    image: mongo:6
     ports:
       - "27017:27017"
     volumes:
@@ -22,6 +22,11 @@ services:
     environment:
       - AWS_REGION=us-east-1
       - MONGO_URI=mongodb://mongodb:27017/UserAuthDB
+      - PORT=4000
+    expose:
+      - "4000"
+    depends_on:
+      - mongodb
     networks:
       - app-network
 
@@ -29,11 +34,14 @@ services:
     build: ./backend/videostreaming-service
     environment:
       - AWS_REGION=us-east-1
+      - PORT=3001
       - MONGO_URI=mongodb://mongodb:27017
       - MONGO_DB_NAME=VideoStreamingDB
       - MONGO_COLLECTION_NAME=VideosMetaData
-    volumes:
-      - ~/.aws:/root/.aws
+    expose:
+      - "3001"
+    depends_on:
+      - mongodb
     networks:
       - app-network
 
@@ -41,43 +49,51 @@ services:
     build: ./backend/watchlist-service
     environment:
       - AWS_REGION=us-east-1
+      - PORT=3002
       - DYNAMO_TABLE_NAME=WatchlistData
+    expose:
+      - "3002"
+    volumes:
+      - ~/.aws:/root/.aws:ro
     networks:
       - app-network
 
   api-gateway:
     build: ./backend/api-gateway
     ports:
-      - "3003:3003"  # Exposing the API Gateway publicly on port 8083
+      - "3003:3003"
     depends_on:
       - userauthentication-service
       - videostreaming-service
       - watchlist-service
     environment:
-      - AUTH_SERVICE_URL=http://userauthentication-service:3000
+      - PORT=3003
+      - USER_SERVICE_URL=http://userauthentication-service:4000
       - VIDEO_SERVICE_URL=http://videostreaming-service:3001
       - WATCHLIST_SERVICE_URL=http://watchlist-service:3002
     networks:
       - app-network
 
+  # If you want the frontend containerized, ensure ./frontend has a Dockerfile that builds React
   frontend:
     build:
       context: ./frontend
-    depends_on:
-      - api-gateway
-    environment:
-      - REACT_APP_API_URL=http://98.85.96.246:3003/api
-    networks:
-      - app-network
-
-  nginx:
-    build:
-      context: .
-      dockerfile: ./Dockerfile-nginx  # Reference your NGINX Dockerfile
     ports:
-      - "80:80"  # NGINX serving HTTP traffic on port 80
+      - "3000:3000"
+    environment:
+      - HOST=0.0.0.0
     depends_on:
-      - frontend
       - api-gateway
     networks:
       - app-network
+#  nginx:
+#    build:
+#      context: .
+#      dockerfile: ./Dockerfile-nginx
+#    ports:
+#      - "80:80"
+#    depends_on:
+#      - frontend
+#      - api-gateway
+#    networks:
+#      - app-network

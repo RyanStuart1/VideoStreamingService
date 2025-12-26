@@ -1,129 +1,156 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const VideoPlayerPage = () => {
-  const { id } = useParams(); // Extract video ID from the URL
-  const navigate = useNavigate(); // For navigating to different videos
-  const [videos, setVideos] = useState([]); // List of all videos
-  const [selectedVideo, setSelectedVideo] = useState(null); // Currently playing video
-  const [loading, setLoading] = useState(false);
+const FALLBACK_POSTER =
+  "/placeholder.png";
 
-  // Fetch all videos and the selected video by ID
+export default function VideoPlayerPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [videos, setVideos] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [loadingList, setLoadingList] = useState(false);
+  const [loadingVideo, setLoadingVideo] = useState(false);
+
+  // Fetch list
   useEffect(() => {
     const fetchVideos = async () => {
+      setLoadingList(true);
       try {
-        console.log('Fetching video list...');
-        const response = await axios.get('/videos');
-        setVideos(response.data);
-        console.log('Videos fetched:', response.data);
+        const res = await axios.get("/videos");
+        setVideos(res.data || []);
       } catch (err) {
-        console.error('Failed to fetch video list:', err);
+        console.error("Failed to fetch video list:", err);
+      } finally {
+        setLoadingList(false);
       }
     };
-
     fetchVideos();
   }, []);
 
+  // Fetch selected video metadata
   useEffect(() => {
     const fetchVideo = async () => {
-      if (!id) return;
-      setLoading(true);
+      if (!id) {
+        setSelectedVideo(null);
+        return;
+      }
+      setLoadingVideo(true);
       try {
-        console.log('Requesting video with ID:', id);
-
-        // Fetch the video metadata by ID
-        const response = await axios.get(`/videos/${id}`);
-        const videoData = response.data;
-        console.log('Video metadata received:', videoData);
+        const res = await axios.get(`/videos/${id}`);
+        const v = res.data;
 
         setSelectedVideo({
-          id: videoData._id,
-          title: videoData.title,
-          url: videoData.url,
+          _id: v._id,
+          title: v.title,
+          url: v.url,
+          thumbnail: v.thumbnail,
         });
       } catch (err) {
-        console.error('Failed to load video metadata:', err);
-        if (err.response && err.response.status === 404) {
-          alert('Video not found. Please select another video.');
-        } else {
-          alert('Failed to load video. Please try again later.');
-        }
+        console.error("Failed to load video metadata:", err);
+        setSelectedVideo(null);
       } finally {
-        setLoading(false);
+        setLoadingVideo(false);
       }
     };
-
     fetchVideo();
-  }, [id]); // Refetch the video when the ID in the URL changes
+  }, [id]);
 
-  // Function to handle video selection
-  const handleVideoSelect = (videoId) => {
-    navigate(`/video/${videoId}`); // Update the URL to the selected video
-  };
+  const sidebarItems = useMemo(() => videos || [], [videos]);
+
+  const handleSelect = (videoId) => navigate(`/video/${videoId}`);
 
   return (
-    <div style={{ display: 'flex', backgroundColor: 'black', color: 'red', padding: '20px' }}>
-      {/* Video List Section */}
-      <div style={{ width: '30%', overflowY: 'auto', paddingRight: '10px' }}>
-        <h3>Available Videos</h3>
-        {videos.length > 0 ? (
-          videos.map((video) => (
-            <div
-              key={video._id}
-              className="video-item"
-              style={{
-                cursor: 'pointer',
-                margin: '10px',
-                padding: '10px',
-                border: '1px solid red',
-                borderRadius: '5px',
-                color: 'white',
-                backgroundColor: video._id === id ? '#333' : 'black', // Highlight the selected video
-              }}
-              onClick={() => handleVideoSelect(video._id)}
-            >
-              <img
-                src={video.thumbnail}
-                alt={video.title}
-                style={{ width: '100%', height: 'auto', marginBottom: '10px' }}
-              />
-              <p>{video.title}</p>
-            </div>
-          ))
-        ) : (
+    <div className="vp">
+      {/* Left rail */}
+      <aside className="vpRail">
+        <div className="vpRailHeader">
           <div>
-            <p>No videos available</p>
+            <div className="vpRailTitle">Browse</div>
+            <div className="vpRailSub">Pick something to watch</div>
+          </div>
+        </div>
+
+        {loadingList ? (
+          <div className="vpRailCard">Loading library…</div>
+        ) : sidebarItems.length === 0 ? (
+          <div className="vpRailCard">
+            <div>No videos available.</div>
             <a
+              className="vpLink"
               href="https://video-streaming-service-rs.s3.us-east-1.amazonaws.com/big_buck_bunny_1080p_h264.mp4"
-              style={{ color: 'red', textDecoration: 'underline' }}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Click here to view a sample video
+              Open sample video
             </a>
           </div>
+        ) : (
+          <div className="vpList">
+            {sidebarItems.map((v) => {
+              const active = String(v._id) === String(id);
+              return (
+                <button
+                  key={v._id}
+                  className={`vpItem ${active ? "isActive" : ""}`}
+                  onClick={() => handleSelect(v._id)}
+                >
+                  <img
+                    className="vpThumb"
+                    src={v.thumbnail || FALLBACK_POSTER}
+                    alt={v.title}
+                    onError={(e) => {
+                      e.currentTarget.src = FALLBACK_POSTER;
+                    }}
+                  />
+                  <div className="vpMeta">
+                    <div className="vpTitle">{v.title}</div>
+                    <div className="vpHint">{active ? "Now playing" : "Play"}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         )}
-      </div>
+      </aside>
 
-      {/* Video Player Section */}
-      <div style={{ width: '70%', textAlign: 'center' }}>
-        {loading ? (
-          <p>Loading video...</p>
+      {/* Player */}
+      <main className="vpMain">
+        {loadingVideo ? (
+          <div className="vpStage vpCenter">
+            <div className="vpSpinner" />
+            <div className="vpMuted">Loading video…</div>
+          </div>
         ) : selectedVideo ? (
-          <div>
-            <h2>{selectedVideo.title}</h2>
-            <video controls width="100%" height="450">
-              <source src={selectedVideo.url} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+          <div className="vpStage">
+            <div className="vpTop">
+              <div>
+                <div className="vpNowPlaying">NOW PLAYING</div>
+                <h1 className="vpH1">{selectedVideo.title}</h1>
+              </div>
+            </div>
+
+            <div className="vpPlayerWrap">
+              <video
+                className="vpVideo"
+                controls
+                playsInline
+                poster={selectedVideo.thumbnail || FALLBACK_POSTER}
+              >
+                <source src={selectedVideo.url} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </div>
         ) : (
-          <p>Select a video to play</p>
+          <div className="vpStage vpCenter">
+            <div className="vpEmptyTitle">Select a video</div>
+            <div className="vpMuted">Choose something from the left to start playing.</div>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
-};
-
-export default VideoPlayerPage;
+}

@@ -1,8 +1,15 @@
 FROM node:20
+
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+
+# Install dependencies for the React app (which lives in ./app)
+COPY app/package*.json ./app/
+RUN cd app && npm install
+
+# Copy the React app source
 COPY app ./app
-WORKDIR /app
-EXPOSE 3003
-CMD ["npm", "start"]
+
+EXPOSE 3000
+
+# Run the React dev server
+CMD ["sh", "-c", "cd app && npm start"]
