@@ -1,95 +1,5 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #141414; /* Dark Netflix-like background */
-  color: #fff;
-}
-
-.App {
-  font-family: Arial, sans-serif;
-  color: white;
-  background-color: #141414;
-  padding: 20px;
-}
-
-h1, h3 {
-  color: #e50914;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-.users-list li, .watchlist li {
-  background-color: #333;
-  margin: 5px 0;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.video-player {
-  margin: 20px 0;
-}
-
-.video-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.video-item {
-  background-color: #333;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: transform 0.3s, background-color 0.3s;
-}
-
-.video-item:hover {
-  transform: scale(1.05);
-  background-color: #444;
-}
-
-.video-item h4 {
-  font-size: 16px;
-  margin: 5px 0;
-}
-
-/* Watchlist section */
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  margin: 8px 0;
-  padding: 10px;
-  background: #333;
-  border-radius: 8px;
-}
-
-/* Users Section */
-ul li {
-  font-size: 16px;
-}
-
-/* Responsive Design */
-@media screen and (max-width: 768px) {
-  .video-player video {
-    max-width: 100%;
-    height: auto;
-  }
-
-  .video-item {
-    flex: 0 0 80%; /* Make each video take more space on small screens */
-  }
-}
-
 :root{
-  --bg: #0b0b0f;
+  --bg: #0b0c10;
   --panel: rgba(255,255,255,.06);
   --border: rgba(255,255,255,.12);
   --text: rgba(255,255,255,.92);
@@ -98,11 +8,35 @@ ul li {
 }
 
 *{ box-sizing: border-box; }
-body{ margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
 
-.appShell{ min-height:100vh; }
-.container{ width:min(1100px, 92vw); margin:0 auto; padding:24px 0; }
+html, body, #root{
+  height: 100%;
+  margin: 0;
+}
 
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color: var(--text);
+}
+
+/* ONE global background lives here */
+.appShell{
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 650px at 20% 0%, rgba(229,9,20,.18), transparent 60%),
+    radial-gradient(1000px 650px at 82% 35%, rgba(56,125,255,.18), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.85)),
+    var(--bg);
+}
+
+/* Common layout container */
+.container{
+  width: min(1100px, 92vw);
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+/* Common UI surfaces */
 .card{
   background: var(--panel);
   border: 1px solid var(--border);
@@ -112,13 +46,14 @@ body{ margin:0; background:var(--bg); color:var(--text); font-family: system-ui,
 
 .btn{
   background: var(--accent);
-  color: white;
+  color: #fff;
   border: 0;
   border-radius: 10px;
   padding: 10px 14px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
 }
+
 .btnGhost{
   background: transparent;
   color: var(--text);
@@ -126,12 +61,9 @@ body{ margin:0; background:var(--bg); color:var(--text); font-family: system-ui,
   border-radius: 10px;
   padding: 10px 14px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
 }
 
+/* Utility */
 .grid{ display:grid; gap:16px; grid-template-columns: 1fr 1fr; }
 @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
-
-.list{ margin:0; padding:0; list-style:none; display:grid; gap:10px; }
-.list li{ padding:10px 12px; border:1px solid var(--border); border-radius:12px; background: rgba(0,0,0,.25); }
-

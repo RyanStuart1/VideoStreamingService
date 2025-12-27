@@ -1,6 +1,6 @@
 .vp {
-  min-height: 100vh;
-  background: #0b0b0f;
+  min-height: calc(100vh - 64px);
+  background: transparent;  /* key change */
   color: #fff;
   display: grid;
   grid-template-columns: 340px 1fr;
@@ -117,10 +117,7 @@
 /* MAIN */
 .vpMain {
   padding: 22px;
-  background:
-    radial-gradient(70% 60% at 20% 20%, rgba(255, 0, 80, 0.18), transparent 60%),
-    radial-gradient(60% 60% at 80% 40%, rgba(0, 140, 255, 0.16), transparent 55%),
-    #0b0b0f;
+  background: transparent; /* key change */
 }
 
 .vpStage {

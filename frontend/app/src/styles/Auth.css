@@ -12,16 +12,7 @@
   display: grid;
   place-items: center;
   padding: 28px 16px;
-  background: radial-gradient(
-      800px 400px at 20% 0%,
-      rgba(229, 9, 20, 0.22),
-      transparent 60%
-    ),
-    radial-gradient(
-      600px 400px at 80% 10%,
-      rgba(255, 255, 255, 0.08),
-      transparent 60%
-    );
+  background: transparent; /* key change */
 }
 
 .authCard {
